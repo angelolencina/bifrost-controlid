@@ -28,4 +28,6 @@ Server.middleware.registerNamed({
   signature: () => import('App/Middleware/HubSignature'),
 })
 
-new DeskoModule().loadingPlugins()
+try {
+  new DeskoModule().loadingPlugins()
+} catch (e) {}

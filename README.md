@@ -18,19 +18,28 @@ Além disto é bom ter um editor para trabalhar com o código como [VSCode](http
 
 ### 🎲 Rodando o Back End (servidor)
 
+Conectar banco ControlId, criar database
+
+```
+CREATE DATABASE desko_controlid
+```
+
+
+
 ```bash
-# Clone este repositório
 $ git clone <https://github.com/deskbee/bifrost-controlid>
 
-# Acesse a pasta do projeto no terminal/cmd
 $ cd bifrost
 
-# Instale as dependências
 $ npm install
 
+** Configurar .env **
 
-# Execute a aplicação em modo de desenvolvimento
-$ npm run dev
+$ node ace generate key
+
+$ node ace migration:run
+
+$ node ace serve
 
 # O servidor inciará na porta:3000 - acesse <http://localhost:3000>
 ```
