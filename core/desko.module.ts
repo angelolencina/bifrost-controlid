@@ -16,7 +16,7 @@ export default class DeskoModule {
     Logger.info(`loading ${plugins.join(',')} plugins ....`)
 
     plugins.map(async (plugin) => {
-      const file = `${Application.appRoot}/plugins/${plugin}/index.ts`
+      const file = `${Application.appRoot}/plugins/${plugin}/index`
       Logger.info(`loading ${file}`)
       const MODULE = await import(file)
       new MODULE.default().init()
