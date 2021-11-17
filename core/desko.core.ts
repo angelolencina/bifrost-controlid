@@ -25,7 +25,7 @@ export default class DeskoCore {
 
   protected schedule(callback) {
     callback()
-    return require('node-schedule').scheduleJob('*/10 * * * *', async () => callback())
+    return require('node-schedule').scheduleJob('*/1 * * * *', async () => callback())
   }
 
   protected getEnv(file: string) {

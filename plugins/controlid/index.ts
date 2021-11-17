@@ -41,10 +41,20 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
           floor: JSON.stringify(event.floor),
           building: JSON.stringify(event.building),
         })
+
+      if (DateTime.fromJSDate(event.start_date).ordinal == DateTime.now().ordinal) {
+        this.userAccessLimit({
+          uuid: event.uuid,
+          email: event.person.email,
+          start_date: event.start_date,
+          end_date: event.end_date,
+        })
+      }
     })
   }
 
   private async sync() {
+    
     const dateStart = DateTime.local().startOf('day')
     const dateEnd = DateTime.local().endOf('day')
     const bookings = await this.persist()
@@ -55,19 +65,29 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
       .whereNull('sync_date')
       .select('*')
 
+      this.logger(`sync ${DateTime.local().toFormat('yyyy-MM-dd HH:mm:s')}: ${bookings.length} bookings`)
+
     // nengh7m evento novo para sincronizar
     if (!bookings.length) {
       return
     }
 
     bookings.map(async (booking) => {
-      const user = await this.dbControId
+      this.userAccessLimit({
+        uuid: booking.uuid,
+        email: booking.person.email,
+        start_date: booking.start_date,
+        end_date: booking.end_date,
+      })
+    })
+  }
+
+  private async userAccessLimit ({ uuid, email, start_date, end_date}) {
+    const user = await this.dbControId
         .query()
         .from('users')
-        .where('email', booking.person.email)
+        .where('email', email)
         .first()
-
-      console.log('user', user)
 
       if (!user) {
         // XXX TODO :: Podemo inserir usuarios caso nao existam na base?
@@ -76,11 +96,10 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
       }
 
       await this.dbControId.query().from('users').where('id', user.id).update({
-        dateLimit: booking.start_date,
-        dateStartLimit: booking.end_date,
+        dateLimit: DateTime.fromJSDate(start_date).startOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
+        dateStartLimit: DateTime.fromJSDate(end_date).endOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
       })
 
-      await this.persist().booking().setSync(booking.uuid)
-    })
+      await this.persist().booking().setSync(uuid)
   }
 }

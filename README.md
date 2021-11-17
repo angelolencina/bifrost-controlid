@@ -6,32 +6,33 @@
 
 Bifrost é um micro-serviço com a capacidade se ser a ponte que estabelece a ligação entre o Desko e Outros Sistemas.
 
-### Features
-
-- [x] Fluxo e API de Comunicação com o Desko via WebHook e Api
+Esta versão é compatível com IdSecure da ControlId: https://www.controlid.com.br/docs/idsecure-pt/
 
 ### Pré-requisitos
 
-Antes de começar, você vai precisar ter instalado em sua máquina as seguintes ferramentas:
-[Git](https://git-scm.com), [Node.js](https://nodejs.org/en/). 
-Além disto é bom ter um editor para trabalhar com o código como [VSCode](https://code.visualstudio.com/)
+Para ambiente Dev, você vai precisar ter instalado em sua máquina as seguintes ferramentas:
+- [Git](https://git-scm.com),
+- [Node.js](https://nodejs.org/en/). 
+- [VSCode](https://code.visualstudio.com/)
 
-### 🎲 Rodando o Back End (servidor)
+### 🎲 Rodando Serviço
 
-Conectar banco ControlId, criar database
+Este Gateway deverá ser instalado na mesma máquina na qual o IdSecure foi instalado:
 
+- Conecte no Banco de Dados MySql  do Id Secure e crie uma database
 ```
 CREATE DATABASE desko_controlid
 ```
 
-
+- Faça checkout do Projeto e instale as dependencias
 
 ```bash
 $ git clone <https://github.com/deskbee/bifrost-controlid>
 
-$ cd bifrost
+$ cd bifrost-controlid
 
 $ npm install
+```
 
 ** Configurar .env **
 

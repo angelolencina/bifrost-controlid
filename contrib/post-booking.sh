@@ -1,3 +1,4 @@
+#!/bin/bash
 curl -v --location --request POST 'http://127.0.0.1:3000/events' \
 --header 'x-hub-signature: 4a455b15c182e6cf5b4cbb0c9bf49ec66002a9e8ef6ea0edce1ad9b4cb4f5531' \
 --header 'Content-Type: application/json' \
