@@ -1,4 +1,4 @@
-# Desko Bifrost
+# Desko Bifrost / IdSecure
 
 🚧  🚀 Em construção...  🚧
 
@@ -34,15 +34,47 @@ $ cd bifrost-controlid
 $ npm install
 ```
 
-** Configurar .env **
+- Configurar .env
+```
+$ cp .env-example .env
 
-$ node ace generate key
+$ node bifrost generate key
+```
 
+- Copie o APP_KEY no .env
+- Acesse o Painel Desko https://painel.desko.com.br
+- Crie um Aplicativo Client conforme documentação, liberando os escopos **booking.show building.show**: https://developers.desko.com.br/referencia-api/autenticacao/criando-aplicativo
+- Copie o **clientid**, **client_secret** e os **escopos** para os atributos **DESKO_API_CLIENT_ID** e **DESKO_API_CLIENT_SECRET** no .env
+- Crie um WebHook no Painel Desko, conforme documentação: https://developers.desko.com.br/webhook-iniciando
+
+- **OBS** O Servidor IdSecure terá que liberar a porta configurada no atrtibuto **PORT** do .env para a internet, podendo restrigir o acesso via Firewall.
+
+- Copie a Chave de Assinatura no atributo **SIGNATURE** no .env
+
+- Informe no .env os dados de conexão Banco de dados; **DB_MYSQL_***
+
+- Configure o .env informando os dados de conexao Banco de Dados do ControlID **CONTROLID_MYSQL_HOST**
+
+- Execute as Migrations
+```
 $ node ace migration:run
+```
 
-$ node ace serve
+```
+$ node bifrost serve
+```
 
-# O servidor inciará na porta:3000 - acesse <http://localhost:3000>
+O servidor inciará na porta:3000 - acesse <http://<ip da maquina>:3000/ping> para testar
+
+
+## Instalando como Serviço no Windows:
+
+```
+$ npm install -g node-windows
+$ npm link node-windows
+
+node installl-windows-service.js
+node unistall-windows-service.js
 ```
 
 ### 🛠 Tecnologias
