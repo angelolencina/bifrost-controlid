@@ -11,7 +11,6 @@
 
 import Server from '@ioc:Adonis/Core/Server'
 import DeskoModule from '../core/desko.module'
-//import ControlIdModule from '../context/modules/control-id/control-id.module'
 
 /*
 |--------------------------------------------------------------------------

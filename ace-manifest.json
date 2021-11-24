@@ -1,17 +1,5 @@
 {
   "commands": {
-    "plugin:install": {
-      "settings": {
-        "loadApp": false,
-        "stayAlive": false
-      },
-      "commandPath": "./commands/PluginInstall",
-      "commandName": "plugin:install",
-      "description": "install plugin from a github repository",
-      "args": [],
-      "aliases": [],
-      "flags": []
-    },
     "dump:rcfile": {
       "settings": {},
       "commandPath": "@adonisjs/core/build/commands/DumpRc",

@@ -1,19 +1,21 @@
 import { DateTime } from 'luxon'
-import DeskoCore from '../../core/desko.core'
+import DeskoCore from '../core/desko.core'
+import Env from '@ioc:Adonis/Core/Env'
+const axios = require('axios')
+const https = require('https')
 
 export default class Plugin extends DeskoCore implements DeskoPlugin {
   private dbControId: any
 
   public init() {
-    const env = this.getEnv(`${__dirname}/.env`)
     this.dbControId = this.database('controlIdMySQLConnection', {
       client: 'mysql',
       connection: {
-        host: env.CONTROLID_MYSQL_HOST,
-        port: env.CONTROLID_MYSQL_PORT,
-        user: env.CONTROLID_MYSQL_USER,
-        password: env.CONTROLID_MYSQL_PASSWORD,
-        database: env.CONTROLID_MYSQL_DB_NAME,
+        host: Env.get('CONTROLID_MYSQL_HOST'),
+        port: Env.get('CONTROLID_MYSQL_PORT'),
+        user: Env.get('CONTROLID_MYSQL_USER'),
+        password: Env.get('CONTROLID_MYSQL_PASSWORD'),
+        database:Env.get('CONTROLID_MYSQL_DB_NAME'),
       },
     })
 
@@ -65,7 +67,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
       .whereNull('sync_date')
       .select('*')
 
-      this.logger(`sync ${DateTime.local().toFormat('yyyy-MM-dd HH:mm:s')}: ${bookings.length} bookings`)
+    this.logger(`sync ${DateTime.local().toFormat('yyyy-MM-dd HH:mm:s')}: ${bookings.length} bookings`)
 
     // nengh7m evento novo para sincronizar
     if (!bookings.length) {
@@ -80,6 +82,8 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
         end_date: booking.end_date,
       })
     })
+
+    this.syncAll()
   }
 
   private async userAccessLimit ({ uuid, email, start_date, end_date}) {
@@ -87,6 +91,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
         .query()
         .from('users')
         .where('email', email)
+        .where('deleted', 0)
         .first()
 
       if (!user) {
@@ -96,10 +101,27 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
       }
 
       await this.dbControId.query().from('users').where('id', user.id).update({
-        dateLimit: DateTime.fromJSDate(start_date).startOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
-        dateStartLimit: DateTime.fromJSDate(end_date).endOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
+        dateStartLimit: DateTime.fromJSDate(start_date).startOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
+        dateLimit: DateTime.fromJSDate(end_date).endOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
       })
 
       await this.persist().booking().setSync(uuid)
+  }
+
+  private async syncAll() {
+    const url = `https://localhost:30443/api/util/SyncAll`
+    this.logger(`syncAll: ${url}`)
+    try {
+        const result = await axios({
+          httpsAgent: new https.Agent({  
+            rejectUnauthorized: false
+          }),
+          method: 'GET',
+          url: url
+        })
+      this.logger(`syncAll Result : ${result.statusText} (${result.status})`)
+    } catch (e) {
+      this.logger(`syncAll Error  : ${JSON.stringify(e)}`)
+    }
   }
 }
