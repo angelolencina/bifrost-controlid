@@ -15,7 +15,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
         port: Env.get('CONTROLID_MYSQL_PORT'),
         user: Env.get('CONTROLID_MYSQL_USER'),
         password: Env.get('CONTROLID_MYSQL_PASSWORD'),
-        database:Env.get('CONTROLID_MYSQL_DB_NAME'),
+        database: Env.get('CONTROLID_MYSQL_DB_NAME'),
       },
     })
 
@@ -51,12 +51,13 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
           start_date: event.start_date,
           end_date: event.end_date,
         })
+        this.syncAll()
       }
     })
   }
 
   private async sync() {
-    
+    const now = DateTime.local().toFormat('yyyy-MM-dd HH:mm:s')
     const dateStart = DateTime.local().startOf('day')
     const dateEnd = DateTime.local().endOf('day')
     const bookings = await this.persist()
@@ -67,7 +68,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
       .whereNull('sync_date')
       .select('*')
 
-    this.logger(`sync ${DateTime.local().toFormat('yyyy-MM-dd HH:mm:s')}: ${bookings.length} bookings`)
+    this.logger(`sync ${now}: ${bookings.length} bookings`)
 
     // nengh7m evento novo para sincronizar
     if (!bookings.length) {
@@ -86,39 +87,43 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     this.syncAll()
   }
 
-  private async userAccessLimit ({ uuid, email, start_date, end_date}) {
+  private async userAccessLimit({ uuid, email, start_date, end_date }) {
     const user = await this.dbControId
-        .query()
-        .from('users')
-        .where('email', email)
-        .where('deleted', 0)
-        .first()
+      .query()
+      .from('users')
+      .where('email', email)
+      .where('deleted', 0)
+      .first()
 
-      if (!user) {
-        // XXX TODO :: Podemo inserir usuarios caso nao existam na base?
-        //this.insertUser(booking.person)
-        return
-      }
+    if (!user) {
+      // XXX TODO :: Podemo inserir usuarios caso nao existam na base?
+      //this.insertUser(booking.person)
+      return
+    }
 
-      await this.dbControId.query().from('users').where('id', user.id).update({
+    await this.dbControId
+      .query()
+      .from('users')
+      .where('id', user.id)
+      .update({
         dateStartLimit: DateTime.fromJSDate(start_date).startOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
         dateLimit: DateTime.fromJSDate(end_date).endOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
       })
 
-      await this.persist().booking().setSync(uuid)
+    await this.persist().booking().setSync(uuid)
   }
 
   private async syncAll() {
     const url = `https://localhost:30443/api/util/SyncAll`
     this.logger(`syncAll: ${url}`)
     try {
-        const result = await axios({
-          httpsAgent: new https.Agent({  
-            rejectUnauthorized: false
-          }),
-          method: 'GET',
-          url: url
-        })
+      const result = await axios({
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false,
+        }),
+        method: 'GET',
+        url: url,
+      })
       this.logger(`syncAll Result : ${result.statusText} (${result.status})`)
     } catch (e) {
       this.logger(`syncAll Error  : ${JSON.stringify(e)}`)
