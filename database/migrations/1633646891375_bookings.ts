@@ -8,7 +8,7 @@ export default class Bookings extends BaseSchema {
       table.increments('id')
       table.string('action', 15).index()
       table.uuid('uuid').index()
-      table.timestamp('sync_date', { useTz: true }).index()
+      table.dateTime('sync_date', { useTz: true }).index()
       table.dateTime('start_date', { useTz: true }).index()
       table.dateTime('end_date', { useTz: true }).index()
       table.string('state', 20).index()
@@ -16,8 +16,8 @@ export default class Bookings extends BaseSchema {
       table.json('place')
       table.json('floor')
       table.json('building')
-      table.timestamp('created_at', { useTz: true })
-      table.timestamp('updated_at', { useTz: true })
+      table.dateTime('created_at', { useTz: true })
+      table.dateTime('updated_at', { useTz: true })
     })
   }
 

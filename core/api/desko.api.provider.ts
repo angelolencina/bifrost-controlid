@@ -47,7 +47,12 @@ export default class DeskoApiProvider {
   public async setEventContent() {
     switch (this.event) {
       case 'booking':
-        this.payload = await this.service.getBooking(this.resource.uuid)
+        const payload = await this.service.getBooking(this.resource.uuid)
+        if (!payload) {
+          return
+        }
+
+        this.payload = payload
         return this.getEventBooking()
 
       case 'checkin':

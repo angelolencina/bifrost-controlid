@@ -1,5 +1,5 @@
 import Env from '@ioc:Adonis/Core/Env'
-
+import Logger from '@ioc:Adonis/Core/Logger'
 const axios = require('axios')
 
 export default class DeskoApiService {
@@ -37,16 +37,23 @@ export default class DeskoApiService {
     return this
   }
 
-  public async getBooking(uuid): Promise<object> {
-    await this.auth()
+  public async getBooking(uuid): Promise<object | boolean>  {
+    try {
+      await this.auth()
+      const booking = await axios.get(`${this.endpoint}/v1.1/bookings/${uuid}`, {
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Content-Type': `application/json; charset=UTF-8`,
+        },
+      })
 
-    const booking = await axios.get(`${this.endpoint}/v1.1/bookings/${uuid}`, {
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`,
-        'Content-Type': `application/json; charset=UTF-8`,
-      },
-    })
+      return booking.data.data
 
-    return booking.data.data
+    } catch (e) {
+      Logger.error(`Error API ${e.response.statusText}: (${e.response.status})`)
+      Logger.error(`Error API ${e.response.config.ur}`)
+      Logger.error(`Error API ${JSON.stringify(e.response.data)}`)
+    }
+    return false
   }
 }

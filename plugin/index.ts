@@ -1,14 +1,33 @@
 import { DateTime } from 'luxon'
 import DeskoCore from '../core/desko.core'
 import Env from '@ioc:Adonis/Core/Env'
+import Logger from '@ioc:Adonis/Core/Logger'
+import DeskoEventDto from 'core/dto/desko.event.dto'
+
 const axios = require('axios')
 const https = require('https')
 
 export default class Plugin extends DeskoCore implements DeskoPlugin {
-  private dbControId: any
+  private idSecureDb: any
 
   public init() {
-    this.dbControId = this.database('controlIdMySQLConnection', {
+    this.connIdSecureDb()
+    this.schedule(() => this.sync())
+    this.webhook('booking',  async (deskoEvent) => {
+      if (Env.get('CONTROLID_FUNCTION_ACCESS_CONTROL')) {
+        this.eventAccessControl(deskoEvent)
+      }
+    })
+
+    this.webhook('organization',  async (deskoEvent) => {
+      if (Env.get('CONTROLID_FUNCTION_QRCODE') == true) {
+        this.eventUserQrCode(deskoEvent)
+      }
+    })
+  }
+
+  private connIdSecureDb() {
+    this.idSecureDb = this.database('controlIdMySQLConnection', {
       client: 'mysql',
       connection: {
         host: Env.get('CONTROLID_MYSQL_HOST'),
@@ -18,42 +37,78 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
         database: Env.get('CONTROLID_MYSQL_DB_NAME'),
       },
     })
+  }
 
-    this.schedule(() => this.sync())
+  private async eventUserQrCode(event: DeskoEventDto) {
+    Logger.debug(`event: eventUserQrCode ${JSON.stringify(event)}`)
 
-    // quando receber evento de booking, persiste na base
-    this.webhook('booking', async (payload) => {
-      this.logger(`webhook:booking: ${JSON.stringify(payload)}`)
+    if (event.event != 'deleted') {
+      return
+    }
 
-      const event = await this.provider().runEvent(payload)
-      if (event.action === 'deleted') {
-        return this.persist().booking().delete(event.uuid)
-      }
+    const data = event.included ?? false
+    if (data.object && data.object == 'user') {
+      this.userSaveQrCode(data.email, data.number)
+    }
+  }
 
-      this.persist()
-        .booking()
-        .save({
-          uuid: event.uuid,
-          start_date: event.start_date,
-          end_date: event.end_date,
-          state: event.state,
-          action: event.action,
-          person: JSON.stringify(event.person),
-          place: JSON.stringify(event.place),
-          floor: JSON.stringify(event.floor),
-          building: JSON.stringify(event.building),
-        })
+  private async eventAccessControl(deskoEvent: DeskoEventDto) {
+    Logger.debug(`event: eventAccessControl ${JSON.stringify(deskoEvent)}`)
+    const event = await this.provider().runEvent(deskoEvent)
+    if (!event) {
+      Logger.error('Event NotFound')
+    }
 
-      if (DateTime.fromJSDate(event.start_date).ordinal == DateTime.now().ordinal) {
-        this.userAccessLimit({
-          uuid: event.uuid,
-          email: event.person.email,
-          start_date: event.start_date,
-          end_date: event.end_date,
-        })
-        this.syncAll()
-      }
+    if (event.action === 'deleted') {
+      this.declinedAccess(event)
+      return
+    }
+
+    this.saveCache(event)
+  }
+
+  private saveCache (event) {
+    this.persist()
+      .booking()
+      .save({
+        uuid: event.uuid,
+        start_date: event.start_date,
+        end_date: event.end_date,
+        state: event.state,
+        action: event.action,
+        person: JSON.stringify(event.person),
+        place: JSON.stringify(event.place),
+        floor: JSON.stringify(event.floor),
+        building: JSON.stringify(event.building),
+      })
+
+    if (!this.isToday(event)) {
+      return
+    }
+
+    this.persist().booking().setSync(event.uuid)
+    this.userAccessLimit({
+      email: event.person.email,
+      start_date: event.start_date,
+      end_date: event.end_date,
     })
+
+    this.syncAll()
+  }
+
+  private declinedAccess(event) {
+    this.persist().booking().delete(event.uuid)
+    if (!this.isToday(event)) {
+      return
+    }
+    
+    this.userAccessLimit({
+      email: event.person.email,
+      start_date: new Date(2021, 0, 1, 0, 0, 0),
+      end_date: new Date(2021, 0, 1, 0, 0, 0),
+    })
+
+    this.syncAll()
   }
 
   private async sync() {
@@ -68,7 +123,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
       .whereNull('sync_date')
       .select('*')
 
-    this.logger(`sync ${now}: ${bookings.length} bookings`)
+    Logger.debug(`sync ${now}: ${bookings.length} bookings`)
 
     // nengh7m evento novo para sincronizar
     if (!bookings.length) {
@@ -76,8 +131,8 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     }
 
     bookings.map(async (booking) => {
+      this.persist().booking().setSync(booking.uuid)
       this.userAccessLimit({
-        uuid: booking.uuid,
         email: booking.person.email,
         start_date: booking.start_date,
         end_date: booking.end_date,
@@ -87,8 +142,8 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     this.syncAll()
   }
 
-  private async userAccessLimit({ uuid, email, start_date, end_date }) {
-    const user = await this.dbControId
+  private async getUser(email: string): Promise<object | false> {
+    const user = await this.idSecureDb
       .query()
       .from('users')
       .where('email', email)
@@ -96,12 +151,56 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
       .first()
 
     if (!user) {
+      Logger.info(`userAccessLimit : ${email} not found`)
       // XXX TODO :: Podemo inserir usuarios caso nao existam na base?
       //this.insertUser(booking.person)
+      return false
+    }
+
+    return user
+  }
+
+  private async userSaveQrCode(email: string, number: string) {
+
+    Logger.debug(`userSaveQrCode : ${email} : ${number}`)
+    const user = await this.getUser(email)
+    if (!user) {
       return
     }
 
-    await this.dbControId
+    const cards = await this.idSecureDb
+      .query()
+      .from('cards')
+      .where('idUser', user.id)
+      .where('number', number)
+      .first()
+
+    if (cards) {
+      Logger.debug(`cards :card ${number} exists`)
+      return
+    }
+
+    const query = `
+      INSERT INTO cards (
+        idUser, idType, type, number, numberStr
+      ) VALUES (
+        '${user.id}', '1', '2', '${number}', (select CONCAT(CONVERT((${number} DIV 65536), CHAR), ",", CONVERT((${number} MOD 65536), CHAR)))
+      )
+    `
+    await this.idSecureDb.rawQuery(query)
+    this.syncAll()
+  }
+
+  private async userAccessLimit({ email, start_date, end_date }) {
+
+    Logger.debug(`userAccessLimit : ${email} : ${start_date}:${end_date}`)
+
+    const user = await this.getUser(email)
+    if (!user) {
+      return
+    }
+
+    await this.idSecureDb
       .query()
       .from('users')
       .where('id', user.id)
@@ -109,13 +208,15 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
         dateStartLimit: DateTime.fromJSDate(start_date).startOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
         dateLimit: DateTime.fromJSDate(end_date).endOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
       })
+  }
 
-    await this.persist().booking().setSync(uuid)
+  private isToday(event) {
+    return DateTime.fromJSDate(event.start_date).ordinal == DateTime.now().ordinal
   }
 
   private async syncAll() {
     const url = `https://localhost:30443/api/util/SyncAll`
-    this.logger(`syncAll: ${url}`)
+    Logger.debug(`syncAll: ${url}`)
     try {
       const result = await axios({
         httpsAgent: new https.Agent({
@@ -124,9 +225,9 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
         method: 'GET',
         url: url,
       })
-      this.logger(`syncAll Result : ${result.statusText} (${result.status})`)
+      Logger.debug(`syncAll Result : ${result.statusText} (${result.status})`)
     } catch (e) {
-      this.logger(`syncAll Error  : ${JSON.stringify(e)}`)
+      Logger.error(`syncAll Error  : ${JSON.stringify(e)}`)
     }
   }
 }

@@ -57,7 +57,7 @@ $ node bifrost generate key
 
 - Execute as Migrations
 ```
-$ node ace migration:run
+$ node ace migration:run no-plugins
 ```
 
 ```

@@ -3,6 +3,7 @@ export default interface DeskoEventDto {
   transaction_id: string
   send_at: string
   event: string
+  included: any
   resource: {
     action: string
     route: string

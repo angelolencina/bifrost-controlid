@@ -28,5 +28,7 @@ Server.middleware.registerNamed({
 })
 
 try {
-  new DeskoModule().loadingPlugins()
+  if (!process.argv.includes('no-plugins')) {
+    new DeskoModule().loadingPlugins()
+  }
 } catch (e) {}

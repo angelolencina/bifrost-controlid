@@ -16,8 +16,8 @@ export default class DeskoBookingPersistence {
     return await Database.table('bookings').insert(event)
   }
 
-  public async delete(event) {
-    return await Database.from('bookings').where('uuid', event.uuid).delete()
+  public async delete(uuid: string): Promise<void> {
+    await Database.from('bookings').where('uuid', uuid).delete()
   }
 
   public async setSync(uuid: string): Promise<void> {
