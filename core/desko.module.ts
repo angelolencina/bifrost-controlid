@@ -2,7 +2,6 @@ import Application from '@ioc:Adonis/Core/Application'
 import Logger from '@ioc:Adonis/Core/Logger'
 import Event from '@ioc:Adonis/Core/Event'
 import DeskoEventDto from './dto/desko.event.dto'
-
 export default class DeskoModule {
   public async loadingPlugins() {
     const file = `${Application.appRoot}/plugin/index`

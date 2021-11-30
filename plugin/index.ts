@@ -13,14 +13,14 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
   public init() {
     this.connIdSecureDb()
     this.schedule(() => this.sync())
-    this.webhook('booking',  async (deskoEvent) => {
+    this.webhook('booking', async (deskoEvent) => {
       if (Env.get('CONTROLID_FUNCTION_ACCESS_CONTROL')) {
         this.eventAccessControl(deskoEvent)
       }
     })
 
-    this.webhook('organization',  async (deskoEvent) => {
-      if (Env.get('CONTROLID_FUNCTION_QRCODE') == true) {
+    this.webhook('organization', async (deskoEvent) => {
+      if (Env.get('CONTROLID_FUNCTION_QRCODE')) {
         this.eventUserQrCode(deskoEvent)
       }
     })
@@ -42,7 +42,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
   private async eventUserQrCode(event: DeskoEventDto) {
     Logger.debug(`event: eventUserQrCode ${JSON.stringify(event)}`)
 
-    if (event.event != 'deleted') {
+    if (event.event !== 'deleted') {
       return
     }
 
@@ -101,7 +101,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     if (!this.isToday(event)) {
       return
     }
-    
+
     this.userAccessLimit({
       email: event.person.email,
       start_date: new Date(2021, 0, 1, 0, 0, 0),
@@ -161,7 +161,6 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
   }
 
   private async userSaveQrCode(email: string, number: string) {
-
     Logger.debug(`userSaveQrCode : ${email} : ${number}`)
     const user = await this.getUser(email)
     if (!user) {
@@ -184,7 +183,8 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
       INSERT INTO cards (
         idUser, idType, type, number, numberStr
       ) VALUES (
-        '${user.id}', '1', '2', '${number}', (select CONCAT(CONVERT((${number} DIV 65536), CHAR), ",", CONVERT((${number} MOD 65536), CHAR)))
+        '${user.id}', '1', '2', '${number}',
+        (select CONCAT(CONVERT((${number} DIV 65536), CHAR), ",", CONVERT((${number} MOD 65536), CHAR)))
       )
     `
     await this.idSecureDb.rawQuery(query)
@@ -192,7 +192,6 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
   }
 
   private async userAccessLimit({ email, start_date, end_date }) {
-
     Logger.debug(`userAccessLimit : ${email} : ${start_date}:${end_date}`)
 
     const user = await this.getUser(email)

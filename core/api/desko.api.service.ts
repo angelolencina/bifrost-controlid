@@ -37,7 +37,7 @@ export default class DeskoApiService {
     return this
   }
 
-  public async getBooking(uuid): Promise<object | boolean>  {
+  public async getBooking(uuid): Promise<object | boolean> {
     try {
       await this.auth()
       const booking = await axios.get(`${this.endpoint}/v1.1/bookings/${uuid}`, {
@@ -48,7 +48,6 @@ export default class DeskoApiService {
       })
 
       return booking.data.data
-
     } catch (e) {
       Logger.error(`Error API ${e.response.statusText}: (${e.response.status})`)
       Logger.error(`Error API ${e.response.config.ur}`)

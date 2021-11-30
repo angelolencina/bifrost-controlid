@@ -1,6 +1,6 @@
-# Desko Bifrost / IdSecure
+# Desko Bifrost + IdSecure / ControlId
 
-🚧  🚀 Em construção...  🚧
+🚧  🚀 Em construção :: Prova de Conceito ...  🚧
 
 ## Descrição do Projeto
 
@@ -19,49 +19,49 @@ Para ambiente Dev, você vai precisar ter instalado em sua máquina as seguintes
 
 Este Gateway deverá ser instalado na mesma máquina na qual o IdSecure foi instalado:
 
-- Conecte no Banco de Dados MySql  do Id Secure e crie uma database
+1. Conecte no Banco de Dados MySql  do Id Secure e crie uma database
 ```
 CREATE DATABASE desko_controlid
 ```
 
-- Faça checkout do Projeto e instale as dependencias
+2. Faça checkout do Projeto e instale as dependencias
 
 ```bash
 $ git clone <https://github.com/deskbee/bifrost-controlid>
-
-$ cd bifrost-controlid
-
-$ npm install
+$ cd bifrost-controlid/build
 ```
 
-- Configurar .env
+3. Configurar .env
 ```
 $ cp .env-example .env
-
-$ node bifrost generate key
 ```
 
-- Copie o APP_KEY no .env
+4. Configure os parametros de autenticação
+
+```
 - Acesse o Painel Desko https://painel.desko.com.br
-- Crie um Aplicativo Client conforme documentação, liberando os escopos **booking.show building.show**: https://developers.desko.com.br/referencia-api/autenticacao/criando-aplicativo
+- Crie um Aplicativo Client conforme documentação, https://developers.desko.com.br/referencia-api/autenticacao/criando-aplicativo
+- Libere os escopos **booking.show building.show organization.show**:
 - Copie o **clientid**, **client_secret** e os **escopos** para os atributos **DESKO_API_CLIENT_ID** e **DESKO_API_CLIENT_SECRET** no .env
 - Crie um WebHook no Painel Desko, conforme documentação: https://developers.desko.com.br/webhook-iniciando
+- Copie a Chave de Assinatura no atributo **SIGNATURE** no .env
+```
 
 - **OBS** O Servidor IdSecure terá que liberar a porta configurada no atrtibuto **PORT** do .env para a internet, podendo restrigir o acesso via Firewall.
 
-- Copie a Chave de Assinatura no atributo **SIGNATURE** no .env
+5. Configurando banco de dado
 
 - Informe no .env os dados de conexão Banco de dados; **DB_MYSQL_***
-
 - Configure o .env informando os dados de conexao Banco de Dados do ControlID **CONTROLID_MYSQL_HOST**
 
-- Execute as Migrations
+6. Execute as Migrations
 ```
 $ node ace migration:run no-plugins
 ```
 
+7. Rodando Aplicaco
 ```
-$ node bifrost serve
+$ node server.js
 ```
 
 O servidor inciará na porta:3000 - acesse <http://<ip da maquina>:3000/ping> para testar
@@ -73,7 +73,7 @@ O servidor inciará na porta:3000 - acesse <http://<ip da maquina>:3000/ping> pa
 $ npm install -g node-windows
 $ npm link node-windows
 
-node installl-windows-service.js
+node install-windows-service.js
 node unistall-windows-service.js
 ```
 
