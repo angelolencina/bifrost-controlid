@@ -142,7 +142,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     this.syncAll()
   }
 
-  private async getUser(email: string): Promise<object | false> {
+  private async getUser(email: string) {
     const user = await this.idSecureDb
       .query()
       .from('users')

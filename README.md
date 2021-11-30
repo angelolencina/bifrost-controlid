@@ -29,6 +29,7 @@ CREATE DATABASE desko_controlid
 ```bash
 $ git clone <https://github.com/deskbee/bifrost-controlid>
 $ cd bifrost-controlid/build
+$ npm ci --production
 ```
 
 3. Configurar .env
