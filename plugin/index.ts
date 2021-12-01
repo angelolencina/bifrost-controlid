@@ -11,7 +11,10 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
   private idSecureDb: any
 
   public init() {
-    this.connIdSecureDb()
+    if (!this.connIdSecureDb()) {
+      return
+    }
+
     this.schedule(() => this.sync())
     this.webhook('booking', async (deskoEvent) => {
       if (Env.get('CONTROLID_FUNCTION_ACCESS_CONTROL')) {
@@ -27,16 +30,18 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
   }
 
   private connIdSecureDb() {
+    const settings = this.configConnection()
+    if (!settings) {
+      Logger.warn(`connIdSecureDb: DB invalid data`)
+      return false
+    }
+
     this.idSecureDb = this.database('controlIdMySQLConnection', {
       client: 'mysql',
-      connection: {
-        host: Env.get('CONTROLID_MYSQL_HOST'),
-        port: Env.get('CONTROLID_MYSQL_PORT'),
-        user: Env.get('CONTROLID_MYSQL_USER'),
-        password: Env.get('CONTROLID_MYSQL_PASSWORD'),
-        database: Env.get('CONTROLID_MYSQL_DB_NAME'),
-      },
+      connection: settings,
     })
+
+    return true
   }
 
   private async eventUserQrCode(event: DeskoEventDto) {
@@ -211,6 +216,21 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
 
   private isToday(event) {
     return DateTime.fromJSDate(event.start_date).ordinal == DateTime.now().ordinal
+  }
+
+  private configConnection() {
+
+    if (!Env.get('CONTROLID_MYSQL_USER') || !Env.get('CONTROLID_MYSQL_PASSWORD')) {
+      return false
+    }
+
+    return {
+      host: Env.get('CONTROLID_MYSQL_HOST'),
+      port: Env.get('CONTROLID_MYSQL_PORT'),
+      user: Env.get('CONTROLID_MYSQL_USER'),
+      password: Env.get('CONTROLID_MYSQL_PASSWORD'),
+      database: Env.get('CONTROLID_MYSQL_DB_NAME'),
+    }
   }
 
   private async syncAll() {
