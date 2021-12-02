@@ -22,7 +22,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
       }
     })
 
-    this.webhook('organization', async (deskoEvent) => {
+    this.webhook('personal_badge', async (deskoEvent) => {
       if (Env.get('CONTROLID_FUNCTION_QRCODE')) {
         this.eventUserQrCode(deskoEvent)
       }
@@ -46,13 +46,8 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
 
   private async eventUserQrCode(event: DeskoEventDto) {
     Logger.debug(`event: eventUserQrCode ${JSON.stringify(event)}`)
-
-    if (event.event !== 'deleted') {
-      return
-    }
-
     const data = event.included ?? false
-    if (data.object && data.object == 'user') {
+    if (data) {
       this.userSaveQrCode(data.email, data.number)
     }
   }
