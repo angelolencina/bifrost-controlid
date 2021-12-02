@@ -15,18 +15,22 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
       return
     }
 
-    this.schedule(() => this.sync())
-    this.webhook('booking', async (deskoEvent) => {
-      if (Env.get('CONTROLID_FUNCTION_ACCESS_CONTROL')) {
+    if (Env.get('CONTROLID_FUNCTION_ACCESS_CONTROL')) {
+      this.schedule(() => this.sync())
+      this.webhook('booking', async (deskoEvent) => {
         this.eventAccessControl(deskoEvent)
-      }
-    })
+      })
+    }
 
-    this.webhook('personal_badge', async (deskoEvent) => {
-      if (Env.get('CONTROLID_FUNCTION_QRCODE')) {
+    if (Env.get('CONTROLID_FUNCTION_QRCODE')) {
+      this.webhook('personal_badge', async (deskoEvent) => {
         this.eventUserQrCode(deskoEvent)
-      }
-    })
+      })
+
+      this.webhook('user', async (deskoEvent) => {
+        this.eventUserQrCode(deskoEvent)
+      })
+    }
   }
 
   private connIdSecureDb() {
@@ -47,8 +51,8 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
   private async eventUserQrCode(event: DeskoEventDto) {
     Logger.debug(`event: eventUserQrCode ${JSON.stringify(event)}`)
     const data = event.included ?? false
-    if (data) {
-      this.userSaveQrCode(data.email, data.number)
+    if (data.email && data.personal_badge) {
+      this.userSaveQrCode(data.email, data.personal_badge)
     }
   }
 
@@ -229,7 +233,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
   }
 
   private async syncAll() {
-    const url = `https://localhost:30443/api/util/SyncAll`
+    const url = `${Env.get('CONTROLID_MYSQL_DB_NAME')}/util/SyncAll`
     Logger.debug(`syncAll: ${url}`)
     try {
       const result = await axios({

@@ -6,7 +6,7 @@ xcopy .\.env.example .\desko-idsecure\
 xcopy .\install-windows-service.js .\desko-idsecure\
 xcopy .\uninstall-windows-service.js .\desko-idsecure\
 xcopy .\install.bat .\desko-idsecure\
-powershell  Compress-Archive -LiteralPath .\desko-idsecure -DestinationPath .\releases\bifrost-controlid-v0.0.1.zip
+powershell  Compress-Archive -LiteralPath .\desko-idsecure -DestinationPath .\releases\bifrost-controlid-v1.0.0.zip
 rmdir /s /q desko-idsecure
 echo DONE!
 PAUSE
