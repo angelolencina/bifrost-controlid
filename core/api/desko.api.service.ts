@@ -37,6 +37,31 @@ export default class DeskoApiService {
     return this
   }
 
+  public async api(method, path, payload = null) {
+    try {
+      await this.auth()
+      const result = await axios({
+        method: method,
+        url: `${this.endpoint}/v1.1/${path}`,
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Content-Type': `application/json; charset=UTF-8`,
+        },
+        data: payload
+      })
+
+      Logger.debug(`Result : ${result.statusText} (${result.status})`)
+      Logger.debug(`Payload: ${JSON.stringify(result.data)}`)
+
+      return result.data || null
+    } catch (e) {
+      Logger.error(`Error API ${e.response.statusText}: (${e.response.status})`)
+      Logger.error(`Error API ${e.response.config.ur}`)
+      Logger.error(`Error API ${JSON.stringify(e.response.data)}`)
+    }
+    return false
+  }
+
   public async getBooking(uuid): Promise<object | boolean> {
     try {
       await this.auth()

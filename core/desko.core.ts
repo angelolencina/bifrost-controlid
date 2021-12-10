@@ -1,5 +1,5 @@
 import Event from '@ioc:Adonis/Core/Event'
-import Logger from '@ioc:Adonis/Core/Logger'
+import Env from '@ioc:Adonis/Core/Env'
 import DeskoPersistence from './desko.persistence'
 import Database, {
   MssqlConfig,
@@ -9,10 +9,15 @@ import Database, {
   SqliteConfig,
 } from '@ioc:Adonis/Lucid/Database'
 import DeskoApiProvider from './api/desko.api.provider'
+import DeskoApiService from './api/desko.api.service'
 
 export default class DeskoCore {
   protected webhook(name: string, callback): void {
     Event.on(`webhook:${name}`, (event) => callback(event))
+  }
+
+  protected service(): DeskoApiService {
+    return new DeskoApiService()
   }
 
   protected provider(): DeskoApiProvider {
@@ -25,16 +30,13 @@ export default class DeskoCore {
 
   protected schedule(callback) {
     callback()
-    return require('node-schedule').scheduleJob('*/10 * * * *', async () => callback())
-  }
 
-  protected getEnv(file: string) {
-    const env = require('dotenv').config({ path: file })
-    return env.parsed
-  }
+    let minutes = Number.parseInt(Env.get('CONTROLID_SCHEDULE_POOLING_MINUTES'));
+    if (!minutes || minutes < 1) {
+      minutes = 5
+    }
 
-  public logger(text) {
-    return Logger.info(text)
+    return require('node-schedule').scheduleJob(`*/${minutes} * * * *`, async () => callback())
   }
 
   protected database(

@@ -11,6 +11,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
   private idSecureDb: any
 
   public init() {
+
     if (!this.connIdSecureDb()) {
       return
     }
@@ -23,13 +24,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     }
 
     if (Env.get('CONTROLID_FUNCTION_QRCODE')) {
-      this.webhook('personal_badge', async (deskoEvent) => {
-        this.eventUserQrCode(deskoEvent)
-      })
-
-      this.webhook('user', async (deskoEvent) => {
-        this.eventUserQrCode(deskoEvent)
-      })
+      this.schedule(() => this.eventUserQrCode())
     }
   }
 
@@ -48,12 +43,39 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     return true
   }
 
-  private async eventUserQrCode(event: DeskoEventDto) {
-    Logger.debug(`event: eventUserQrCode ${JSON.stringify(event)}`)
-    const data = event.included ?? false
-    if (data.email && data.personal_badge) {
-      this.userSaveQrCode(data.email, data.personal_badge)
+  private async eventUserQrCode() {
+    /*
+    idType: Representa se o tag está destinado a uma pessoa ou veículo, caso tenha o valor 1 = pessoa, caso tenha o valor 2 = veículo
+    type: Tecnologia do cartão: "0" para ASK/125kHz, "1" para Mifare e "2" para QR-Code.
+    */
+    const query = `SELECT id, email FROM controlid.users where deleted = 0 AND id NOT IN (SELECT idUser FROM controlid.cards where idType = 1 AND type = 2)`
+    const response = await this.idSecureDb.rawQuery(query)
+    const users = response[0] || null
+    if (!users || !users.length) {
+      Logger.info(`eventUserQrCode : nenhum usuario`)
+      return
     }
+
+    const accessToken = await this.authApi()
+    const payload = <any>[]
+    for (const user of users) {
+      const code = await this.createQrCode(accessToken, user.id)
+      if (!code) {
+        Logger.debug(`event: user:${user.id} code not found}`)
+        continue
+      }
+
+      await this.userSaveQrCode(user.id, code)
+      payload.push({
+        identifier_type: 'email',
+        identifier: user.email,
+        code: code
+      })
+
+      this.syncUser(accessToken, user.id)
+    }
+
+    this.service().api('POST', 'integrations/personal-badge', payload)
   }
 
   private async eventAccessControl(deskoEvent: DeskoEventDto) {
@@ -164,35 +186,17 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     return user
   }
 
-  private async userSaveQrCode(email: string, number: string) {
-    Logger.debug(`userSaveQrCode : ${email} : ${number}`)
-    const user = await this.getUser(email)
-    if (!user) {
-      return
-    }
-
-    const cards = await this.idSecureDb
-      .query()
-      .from('cards')
-      .where('idUser', user.id)
-      .where('number', number)
-      .first()
-
-    if (cards) {
-      Logger.debug(`cards :card ${number} exists`)
-      return
-    }
-
+  private async userSaveQrCode(userId: number, number: string) {
+    Logger.debug(`userSaveQrCode : ${userId} : ${number}`)
     const query = `
       INSERT INTO cards (
         idUser, idType, type, number, numberStr
       ) VALUES (
-        '${user.id}', '1', '2', '${number}',
+        '${userId}', '1', '2', '${number}',
         (select CONCAT(CONVERT((${number} DIV 65536), CHAR), ",", CONVERT((${number} MOD 65536), CHAR)))
       )
     `
     await this.idSecureDb.rawQuery(query)
-    this.syncAll()
   }
 
   private async userAccessLimit({ email, start_date, end_date }) {
@@ -233,7 +237,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
   }
 
   private async syncAll() {
-    const url = `${Env.get('CONTROLID_MYSQL_DB_NAME')}/util/SyncAll`
+    const url = `${Env.get('CONTROLID_API')}/util/SyncAll`
     Logger.debug(`syncAll: ${url}`)
     try {
       const result = await axios({
@@ -246,6 +250,80 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
       Logger.debug(`syncAll Result : ${result.statusText} (${result.status})`)
     } catch (e) {
       Logger.error(`syncAll Error  : ${JSON.stringify(e)}`)
+    }
+  }
+
+  private async createQrCode(accessToken, userId) {
+    const url = `${Env.get('CONTROLID_API')}/qrcode/userqrcode`
+    Logger.debug(`createUserQrCode: ${url}`)
+    try {
+      const result = await axios({
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        method: 'POST',
+        url: url,
+        data: userId
+      })
+      
+      return result.data || null
+    } catch (e) {
+      Logger.error(`createUserQrCode Error  : ${JSON.stringify(e)}`)
+    }
+  }
+
+  private async syncUser(accessToken, userId) {
+    const url = `${Env.get('CONTROLID_API')}/util/SyncUser/${userId}`
+    Logger.debug(`syncUser: ${url}`)
+    try {
+      const result = await axios({
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false,
+        }),
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        method: 'GET',
+        url: url
+      })
+      
+      Logger.debug(`Result : ${result.statusText} (${result.status})`)
+      Logger.debug(`Payload: ${JSON.stringify(result.data)}`)
+
+    } catch (e) {
+      Logger.error(`createUserQrCode Error  : ${JSON.stringify(e)}`)
+    }
+  }
+
+  private async authApi() {
+    const url = `${Env.get('CONTROLID_API')}/login`
+    Logger.debug(`Login: ${url}`)
+    try {
+      const result = await axios({
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false,
+        }),
+        method: 'POST',
+        url: url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          username: Env.get('CONTROLID_API_USER'),
+          password: Env.get('CONTROLID_API_PASSWORD')
+        }
+      })
+     
+      Logger.debug(`Result : ${result.statusText} (${result.status})`)
+      Logger.debug(`Payload: ${JSON.stringify(result.data)}`)
+
+      return result.data.accessToken || null
+    } catch (e) {
+      Logger.debug(`Error  : ${e.message} (${e.response}))`)
     }
   }
 }
