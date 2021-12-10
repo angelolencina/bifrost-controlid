@@ -48,7 +48,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     idType: Representa se o tag está destinado a uma pessoa ou veículo, caso tenha o valor 1 = pessoa, caso tenha o valor 2 = veículo
     type: Tecnologia do cartão: "0" para ASK/125kHz, "1" para Mifare e "2" para QR-Code.
     */
-    const query = `SELECT id, email FROM controlid.users where deleted = 0 AND id NOT IN (SELECT idUser FROM controlid.cards where idType = 1 AND type = 2)`
+    const query = `SELECT id, email FROM users where deleted = 0 AND id NOT IN (SELECT idUser FROM cards where idType = 1 AND type = 2)`
     const response = await this.idSecureDb.rawQuery(query)
     const users = response[0] || null
     if (!users || !users.length) {
