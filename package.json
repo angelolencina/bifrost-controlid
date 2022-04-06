@@ -34,6 +34,13 @@
     "node-schedule": "^2.0.0",
     "proxy-addr": "^2.0.7",
     "reflect-metadata": "^0.1.13",
-    "source-map-support": "^0.5.20"
+    "source-map-support": "^0.5.20",
+    "sqlite3": "^5.0.2"
+  },
+  "bin":"buildserver.js",
+  "pkg":{
+    "targets":{
+      "node":"14.15.0"
+    }
   }
 }

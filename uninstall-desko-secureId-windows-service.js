@@ -3,11 +3,11 @@ var Service = require('node-windows').Service;
 var svc = new Service({
   name:'Desko-SecureId',
   description: 'Desko IdSecure Gateway as Windows Service',
-  script: 'C:\\Program Files\\desko-secureid\\server.js'
+  script: 'E:\\inventsys\\bifrost-controlid\\build\\server.js'
 });
 
 svc.on('uninstall',function(){
-  console.log('Uninstall complete.');
+  console.log('Service Desko-SecureId is uninstalled .');
   console.log('The service exists: ', svc.exists);
 });
 

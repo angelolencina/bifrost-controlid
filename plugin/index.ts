@@ -2,7 +2,10 @@ import { DateTime } from 'luxon'
 import DeskoCore from '../core/desko.core'
 import Env from '@ioc:Adonis/Core/Env'
 import Logger from '@ioc:Adonis/Core/Logger'
-import DeskoEventDto from 'core/dto/desko.event.dto'
+import { MysqlConfig, SqliteConfig } from '@ioc:Adonis/Lucid/Database'
+import DeskoEventDto from '../core/dto/desko.event.dto'
+import { TypeEventControlid } from '../core/interfaces/type-event-controlid';
+import { parseEntryRecords } from '../core/utils/mapper-entry-records'
 
 const axios = require('axios')
 const https = require('https')
@@ -15,6 +18,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     if (!this.connIdSecureDb()) {
       return
     }
+    this.schedule(() => this.checkEntryRecords())
 
     if (Env.get('CONTROLID_FUNCTION_ACCESS_CONTROL')) {
       this.schedule(() => this.sync())
@@ -34,12 +38,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
       Logger.warn(`connIdSecureDb: DB invalid data`)
       return false
     }
-
-    this.idSecureDb = this.database('controlIdMySQLConnection', {
-      client: 'mysql',
-      connection: settings,
-    })
-
+    this.idSecureDb = this.database('controlIdDatabaseConnection', settings)
     return true
   }
 
@@ -133,8 +132,20 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
       start_date: new Date(2021, 0, 1, 0, 0, 0),
       end_date: new Date(2021, 0, 1, 0, 0, 0),
     })
-
     this.syncAll()
+  }
+
+  private async checkEntryRecords() {
+    Logger.info(`AutomateCheckin`)
+    const lastRecords = await this.getUserPassLogs()
+    Logger.info(`AutomateCheckin : ${lastRecords.length} checkinEvents`)
+    this.provider().automateCheckin(lastRecords)?.then(() => {
+      this.persist().entryRecord().save(TypeEventControlid.Pass)
+      this.syncAll()
+    })
+    .catch(error => {
+      Logger.info(`Erro ao enviar checkin: ${error}`)
+    })
   }
 
   private async sync() {
@@ -199,6 +210,16 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     await this.idSecureDb.rawQuery(query)
   }
 
+  private async getUserPassLogs(){
+    const lastDateRecord = await this.persist().entryRecord().getDatetimeLastRecord(TypeEventControlid.Pass)
+    const query = `SELECT u.id, u.email, u.name, l.idDevice, l.deviceName, l.reader, l.idArea, l.area, l.event, l.time
+    FROM Logs l
+    INNER JOIN Users u ON l.idUser = u.id
+    WHERE l.event = 7 AND l.time > '${lastDateRecord}'`
+    const records = await this.idSecureDb.rawQuery(query)
+    return parseEntryRecords(records)
+  }
+
   private async userAccessLimit({ email, start_date, end_date }) {
     Logger.debug(`userAccessLimit : ${email} : ${start_date}:${end_date}`)
 
@@ -221,7 +242,15 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     return DateTime.fromJSDate(event.start_date).ordinal == DateTime.now().ordinal
   }
 
-  private configConnection() {
+  private configConnection():SqliteConfig | boolean | MysqlConfig | any {
+
+    if(Env.get('CONTROLID_DB_CONNECTION') == 'sqlite'){
+      return {
+        client: 'sqlite3',
+        connection: {filename: Env.get('CONTROLID_DB_SQLITE_PATH') },
+        useNullAsDefault: true,
+      }
+    }
 
     if (!Env.get('CONTROLID_MYSQL_USER') || !Env.get('CONTROLID_MYSQL_PASSWORD')) {
       return false
@@ -269,7 +298,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
         url: url,
         data: userId
       })
-      
+
       return result.data || null
     } catch (e) {
       Logger.error(`createUserQrCode Error  : ${JSON.stringify(e)}`)
@@ -290,7 +319,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
         method: 'GET',
         url: url
       })
-      
+
       Logger.debug(`Result : ${result.statusText} (${result.status})`)
       Logger.debug(`Payload: ${JSON.stringify(result.data)}`)
 
@@ -317,7 +346,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
           password: Env.get('CONTROLID_API_PASSWORD')
         }
       })
-     
+
       Logger.debug(`Result : ${result.statusText} (${result.status})`)
       Logger.debug(`Payload: ${JSON.stringify(result.data)}`)
 

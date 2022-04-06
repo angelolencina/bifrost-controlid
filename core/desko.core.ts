@@ -10,6 +10,7 @@ import Database, {
 } from '@ioc:Adonis/Lucid/Database'
 import DeskoApiProvider from './api/desko.api.provider'
 import DeskoApiService from './api/desko.api.service'
+import DeskoEntryRecordPersistence from './persistence/desko.entry-record.pesistence'
 
 export default class DeskoCore {
   protected webhook(name: string, callback): void {
@@ -27,6 +28,7 @@ export default class DeskoCore {
   protected persist(): DeskoPersistence {
     return new DeskoPersistence()
   }
+
 
   protected schedule(callback) {
     callback()

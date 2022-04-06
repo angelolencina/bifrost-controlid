@@ -1,5 +1,6 @@
 import Env from '@ioc:Adonis/Core/Env'
 import Logger from '@ioc:Adonis/Core/Logger'
+import { CheckInOutDto } from '../dto/desko.check-in-out.dto';
 const axios = require('axios')
 
 export default class DeskoApiService {
@@ -28,7 +29,9 @@ export default class DeskoApiService {
       {
         headers: { 'Content-Type': `application/json; charset=UTF-8` },
       }
-    )
+    ).catch((e)=>{
+      throw new Error(`Error get token: ${e.response.statusText} (${e.response.status})`)
+    })
 
     // XXX FIXME :: Tratar erros de acess token
     // result.status
@@ -74,10 +77,23 @@ export default class DeskoApiService {
 
       return booking.data.data
     } catch (e) {
-      Logger.error(`Error API ${e.response.statusText}: (${e.response.status})`)
-      Logger.error(`Error API ${e.response.config.ur}`)
-      Logger.error(`Error API ${JSON.stringify(e.response.data)}`)
+      Logger.error(`Error API ${JSON.stringify(e)}`)
     }
     return false
+  }
+
+  public async sendDeviceEvent(events: CheckInOutDto[]) {
+      await this.auth()
+      return axios.post(`${this.endpoint}/v1.1/integrations/checkin`, events,{
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Content-Type': `application/json; charset=UTF-8`,
+        }
+      }).then(res=> res.data)
+      .catch(e=>{
+        Logger.error(`Error API ${JSON.stringify(e)}`)
+        throw new Error(`Erro ao enviar eventos de checkin: ${e.message}`)
+      })
+
   }
 }

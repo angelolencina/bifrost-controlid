@@ -19,7 +19,8 @@ const databaseConfig: DatabaseConfig = {
   | file.
   |
   */
-  connection: Env.get('DB_CONNECTION', 'mysql'),
+  connection: !!Env.get('DATABASE_DRIVE') ? Env.get('DATABASE_DRIVE') : 'mysql',
+
 
   connections: {
     /*
@@ -33,6 +34,20 @@ const databaseConfig: DatabaseConfig = {
     | npm i mysql
     |
     */
+    sqlite: {
+      client: 'sqlite3',
+      connection: {
+        filename: Env.get('CONTROLID_DB_SQLITE_PATH')
+      },
+      useNullAsDefault: true
+    },
+    sqlite2: {
+      client: 'sqlite3',
+      connection: {
+        filename: Env.get('DB_SQLITE_PATH')
+      },
+      useNullAsDefault: true
+    },
     mysql: {
       client: 'mysql2',
       connection: {

@@ -41,7 +41,7 @@ $ cp .env-example .env
 
 ```
 - Acesse o Painel Desko https://painel.desko.com.br
-- Crie um Aplicativo Client conforme documentação, https://developers.desko.com.br/referencia-api/autenticacao/criando-aplicativo
+- No painel desko acesse Crie um Aplicativo Client conforme documentação, https://developers.desko.com.br/referencia-api/autenticacao/criando-aplicativo
 - Libere os escopos **booking.show building.show organization.show**:
 - Copie o **clientid**, **client_secret** e os **escopos** para os atributos **DESKO_API_CLIENT_ID** e **DESKO_API_CLIENT_SECRET** no .env
 - Crie um WebHook no Painel Desko, conforme documentação: https://developers.desko.com.br/webhook-iniciando
@@ -71,7 +71,7 @@ O servidor inciará na porta:3000 - acesse <http://<ip da maquina>:3000/ping> pa
 ## Instalando como Serviço no Windows:
 
 ```
-$ npm install -g node-windows
+$ npm i -g node-windows@1.0.0-beta.6
 $ npm link node-windows
 
 node install-windows-service.js

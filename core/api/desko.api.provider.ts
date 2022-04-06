@@ -6,6 +6,7 @@ import DeskoApiService from './desko.api.service'
 import DeskoBuildingDto from '../dto/desko.building.dto'
 import DeskoFloorDto from '../dto/desko.floor.dto'
 import Logger from '@ioc:Adonis/Core/Logger'
+import { CheckInOutDto } from '../dto/desko.check-in-out.dto';
 
 export default class DeskoApiProvider {
   // Ocupação Andamento
@@ -90,6 +91,13 @@ export default class DeskoApiProvider {
 
   public getEventType(): string {
     return this.event
+  }
+
+  public automateCheckin(events: CheckInOutDto[]) {
+    if(!events.length) {
+      return
+    }
+    return this.service.sendDeviceEvent(events)
   }
 
   public getPerson(): DeskoPersonDto {
