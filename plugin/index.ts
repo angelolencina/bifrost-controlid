@@ -92,7 +92,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     this.saveCache(event)
   }
 
-  private saveCache (event) {
+  private saveCache(event) {
     this.persist()
       .booking()
       .save({
@@ -142,9 +142,9 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     this.provider().automateCheckin(lastRecords)?.then(() => {
       this.persist().entryRecord().save(TypeEventControlid.Pass)
     })
-    .catch(error => {
-      Logger.info(`Erro ao enviar checkin: ${error}`)
-    })
+      .catch(error => {
+        Logger.info(`Erro ao enviar checkin: ${error}`)
+      })
   }
 
   private async sync() {
@@ -165,16 +165,14 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     if (!bookings.length) {
       return
     }
-
-    bookings.map(async (booking) => {
+    for(const booking of bookings) {
       this.persist().booking().setSync(booking.uuid)
       this.userAccessLimit({
         email: booking.person.email,
         start_date: booking.start_date,
         end_date: booking.end_date,
       })
-    })
-
+    }
     this.syncAll()
   }
 
@@ -182,9 +180,9 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     const user = await this.idSecureDb
       .query()
       .from('users')
-      .where('email', email)
-      .where('deleted', 0)
-      .first()
+      .where('email','LIKE', email)
+      .orWhere('email','LIKE', email.toUpperCase())
+      .where('deleted', 0).first()
 
     if (!user) {
       Logger.info(`userAccessLimit : ${email} not found`)
@@ -209,7 +207,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     await this.idSecureDb.rawQuery(query)
   }
 
-  private async getUserPassLogs(){
+  private async getUserPassLogs() {
     const lastDateRecord = await this.persist().entryRecord().getDatetimeLastRecord(TypeEventControlid.Pass)
     const query = `SELECT u.id, u.email, u.name, l.idDevice, l.deviceName, l.reader, l.idArea, l.area, l.event, l.time
     FROM Logs l
@@ -241,12 +239,12 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     return DateTime.fromJSDate(event.start_date).ordinal == DateTime.now().ordinal
   }
 
-  private configConnection():SqliteConfig | boolean | MysqlConfig | any {
+  private configConnection(): SqliteConfig | boolean | MysqlConfig | any {
 
-    if(Env.get('CONTROLID_DB_CONNECTION') == 'sqlite'){
+    if (Env.get('CONTROLID_DB_CONNECTION') == 'sqlite') {
       return {
         client: 'sqlite3',
-        connection: {filename: Env.get('CONTROLID_DB_SQLITE_PATH') },
+        connection: { filename: Env.get('CONTROLID_DB_SQLITE_PATH') },
         useNullAsDefault: true,
       }
     }
