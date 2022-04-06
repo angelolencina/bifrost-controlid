@@ -135,7 +135,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     this.syncAll()
   }
 
-  private async checkEntryRecords() {]
+  private async checkEntryRecords() {
     await this.syncAll()
     const lastRecords = await this.getUserPassLogs()
     Logger.info(`AutomateCheckin : ${lastRecords.length} checkinEvents`)
