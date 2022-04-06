@@ -135,13 +135,12 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
     this.syncAll()
   }
 
-  private async checkEntryRecords() {
-    Logger.info(`AutomateCheckin`)
+  private async checkEntryRecords() {]
+    await this.syncAll()
     const lastRecords = await this.getUserPassLogs()
     Logger.info(`AutomateCheckin : ${lastRecords.length} checkinEvents`)
     this.provider().automateCheckin(lastRecords)?.then(() => {
       this.persist().entryRecord().save(TypeEventControlid.Pass)
-      this.syncAll()
     })
     .catch(error => {
       Logger.info(`Erro ao enviar checkin: ${error}`)
