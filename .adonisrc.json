@@ -47,5 +47,10 @@
     {
       "pattern": "install.bat",
       "reloadServer": false
-    }]
+    },
+    {
+      "pattern": "uninstall.bat",
+      "reloadServer": false
+    }
+  ]
 }
