@@ -35,7 +35,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     this.idSecureDb = this.database('controlIdDatabaseConnection', settings)
     return true
   }
-  private async userSaveQrCode(userId: number, number: string) {
+  public async userSaveQrCode(userId: number, number: string) {
     Logger.debug(`userSaveQrCode : ${userId} : ${number}`)
     const query = `
     INSERT INTO cards (
@@ -72,7 +72,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
 
-  private async eventUserQrCode() {
+  public async eventUserQrCode() {
     /*
     idType: Representa se o tag está destinado a uma pessoa ou veículo, caso tenha o valor 1 = pessoa, caso tenha o valor 2 = veículo
     type: Tecnologia do cartão: "0" para ASK/125kHz, "1" para Mifare e "2" para QR-Code.
@@ -106,7 +106,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     this.service().api('POST', 'integrations/personal-badge', payload)
   }
 
-  private async getUser(email: string) {
+  public async getUser(email: string) {
     const user = await this.idSecureDb
       .query()
       .from('users')
@@ -124,7 +124,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     return user
   }
 
-  private async checkEntryRecords() {
+  public async checkEntryRecords() {
     const lastRecords = await this.getUserPassLogs() || []
     Logger.info(`AutomateCheckin : ${lastRecords.length} checkinEvents`)
     this.provider().automateCheckin(lastRecords)?.then(() => {
@@ -135,7 +135,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       })
   }
 
-  private async getUserPassLogs() {
+  public async getUserPassLogs() {
     await this.syncAll()
     const lastDateRecord = await this.persist().entryRecord().getDatetimeLastRecord(TypeEventControlid.Pass)
     const query = `SELECT u.id, u.email, u.name, l.idDevice, l.deviceName, l.reader, l.idArea, l.area, l.event, l.time
@@ -146,7 +146,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     return parseEntryRecords(records)
   }
 
-  private async userAccessLimit({ email, start_date, end_date }) {
+  public async userAccessLimit({ email, start_date, end_date }) {
     Logger.debug(`userAccessLimit : ${email} : ${start_date}:${end_date}`)
 
     const user = await this.getUser(email)
@@ -166,7 +166,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
 
-  private async syncAll() {
+  public async syncAll() {
     const url = `${Env.get('CONTROLID_API')}/util/SyncAll`
     Logger.debug(`syncAll: ${url}`)
     try {
@@ -183,7 +183,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     }
   }
 
-  private async createQrCode(userId) {
+  public async createQrCode(userId) {
     Logger.debug(`createUserQrCode userId: ${userId}`)
     return apiControlid.post(`/qrcode/userqrcode`, userId)
       .then(res =>  res.data || null)
@@ -193,7 +193,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
 
-  private async syncUser(userId):Promise<void> {
+  public async syncUser(userId):Promise<void> {
     Logger.debug(`syncUser: controlid userId:${userId}`)
     apiControlid.get(`/util/SyncUser/${userId}`)
     .then(res=>{

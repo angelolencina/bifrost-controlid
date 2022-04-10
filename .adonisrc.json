@@ -30,9 +30,22 @@
     "@adonisjs/lucid"
   ],
   "metaFiles": [
+    ".env",
+    ".adonisrc.json",
     {
-      "pattern": "public/**",
+      "pattern": "desko-secureId-windows-service.js",
       "reloadServer": false
-    }
-  ]
+    },
+    {
+      "pattern": "uninstall-desko-secureId-windows-service.js",
+      "reloadServer": false
+    },
+    {
+      "pattern": "bifrost.sqlite",
+      "reloadServer": false
+    },
+    {
+      "pattern": "install.bat",
+      "reloadServer": false
+    }]
 }
