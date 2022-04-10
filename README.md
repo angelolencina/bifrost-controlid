@@ -87,3 +87,6 @@ As seguintes ferramentas foram usadas na construção do projeto:
 - [TypeScript](https://www.typescriptlang.org/)
 - [Axios](https://github.com/axios/axios)
 
+
+git update-index --assume-unchanged
+

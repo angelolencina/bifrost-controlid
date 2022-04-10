@@ -34,17 +34,18 @@ const databaseConfig: DatabaseConfig = {
     | npm i mysql
     |
     */
+
     sqlite: {
       client: 'sqlite3',
       connection: {
-        filename: Env.get('CONTROLID_DB_SQLITE_PATH')
+        filename: './bifrost.sqlite'
       },
       useNullAsDefault: true
     },
     sqlite2: {
       client: 'sqlite3',
       connection: {
-        filename: Env.get('DB_SQLITE_PATH')
+        filename: Env.get('CONTROLID_DB_SQLITE_PATH')
       },
       useNullAsDefault: true
     },

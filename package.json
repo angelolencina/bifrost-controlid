@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "node ace serve --watch",
+    "dev": "node ace migration:run --force=true no-plugins && node ace serve --watch",
     "build": "node ace build --production",
-    "start": "node server.js",
+    "start": "node ace migration:run --force=true no-plugins && node server.js",
     "lint": "eslint . --ext=.ts",
     "format": "prettier --write ."
   },
@@ -37,10 +37,10 @@
     "source-map-support": "^0.5.20",
     "sqlite3": "^5.0.2"
   },
-  "bin":"buildserver.js",
-  "pkg":{
-    "targets":{
-      "node":"14.15.0"
+  "bin": "buildserver.js",
+  "pkg": {
+    "targets": {
+      "node": "14.15.0"
     }
   }
 }
