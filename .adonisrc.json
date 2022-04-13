@@ -33,11 +33,11 @@
     ".env",
     ".adonisrc.json",
     {
-      "pattern": "desko-secureId-windows-service.js",
+      "pattern": "install-deskbee-service-windows.js",
       "reloadServer": false
     },
     {
-      "pattern": "uninstall-desko-secureId-windows-service.js",
+      "pattern": "uninstall-deskbee-service-windows.js",
       "reloadServer": false
     },
     {

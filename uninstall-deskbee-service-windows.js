@@ -1,8 +1,8 @@
 var Service = require('node-windows').Service;
 
 var svc = new Service({
-  name:'Desko-SecureId',
-  description: 'Desko IdSecure Gateway as Windows Service',
+  name:'deskbee-integração',
+  description: 'Integração com a plataforma deskbee',
   script: 'C:\\ProgramData\\Bifrost\\server.js'
 });
 

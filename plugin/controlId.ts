@@ -63,11 +63,14 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     }
 
     return {
-      host: Env.get('CONTROLID_MYSQL_HOST'),
-      port: Env.get('CONTROLID_MYSQL_PORT'),
-      user: Env.get('CONTROLID_MYSQL_USER'),
-      password: Env.get('CONTROLID_MYSQL_PASSWORD'),
-      database: Env.get('CONTROLID_MYSQL_DB_NAME'),
+        client: 'mysql',
+        connection: {
+          host: Env.get('CONTROLID_MYSQL_HOST'),
+          port: Env.get('CONTROLID_MYSQL_PORT'),
+          user: Env.get('CONTROLID_MYSQL_USER'),
+          password: Env.get('CONTROLID_MYSQL_PASSWORD'),
+          database: Env.get('CONTROLID_MYSQL_DB_NAME'),
+        }
     }
   }
 
