@@ -14,7 +14,7 @@ export default class Plugin extends DeskoCore implements DeskoPlugin {
 
   public init() {
     this.controlPlugin.init()
-    if (Env.get('CONTROLID_FUNCTION_ACCESS_CONTROL')) {
+    if (Env.get('FUNCTION_ACCESS_CONTROL')) {
       this.schedule(() => this.sync())
       this.webhook('booking', async (deskoEvent) => {
         this.eventAccessControl(deskoEvent)

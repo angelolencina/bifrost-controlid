@@ -32,7 +32,7 @@ export default class DeskoCore {
   protected schedule(callback) {
     callback()
 
-    let minutes = Number.parseInt(Env.get('CONTROLID_SCHEDULE_POOLING_MINUTES'));
+    let minutes = Number.parseInt(Env.get('SCHEDULE_POOLING_MINUTES'));
     if (!minutes || minutes < 1) {
       minutes = 5
     }

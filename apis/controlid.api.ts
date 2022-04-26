@@ -17,21 +17,17 @@ apiControlid.interceptors.request.use(async (config) => {
 });
 
 const getBearerToken = () => {
-  return axios.post(`${process.env.CONTROLID_API}/login`, getTokenObjectRequest())
-    .then(res => res.data?.access_token ? `Bearer ${res.data.access_token}` : null)
+  return axios.post(`${process.env.CONTROLID_API}/login`, {
+    username: Env.get('CONTROLID_API_USER'),
+    password: Env.get('CONTROLID_API_PASSWORD')
+  }, {
+    httpsAgent: new https.Agent({
+      rejectUnauthorized: false
+    })
+  })
+    .then(res => res.data?.accessToken ? `Bearer ${res.data.accessToken}` : null)
     .catch((err) => {
       console.log('Error get token controlid', err.response)
       throw new Error('Error get token controlid');
     })
-}
-
-const getTokenObjectRequest = () => {
-  return {
-    httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-    headers: { 'Content-Type': 'application/json' },
-    data: {
-      username: Env.get('CONTROLID_API_USER'),
-      password: Env.get('CONTROLID_API_PASSWORD')
-    }
-  }
 }

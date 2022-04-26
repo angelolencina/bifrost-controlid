@@ -36,7 +36,7 @@ echo %SETUP_DIR%
 call npm ci --production
 call npm i -g node-windows@1.0.0-beta.6
 call npm link node-windows
-node .\desko-secureId-windows-service.js
+node .\install-deskbee-service-windows.js
 echo DONE!
 PAUSE
 EXIT

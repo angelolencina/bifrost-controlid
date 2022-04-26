@@ -80,7 +80,8 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     idType: Representa se o tag está destinado a uma pessoa ou veículo, caso tenha o valor 1 = pessoa, caso tenha o valor 2 = veículo
     type: Tecnologia do cartão: "0" para ASK/125kHz, "1" para Mifare e "2" para QR-Code.
     */
-    const query = `SELECT id, email FROM users where deleted = 0 AND id NOT IN (SELECT idUser FROM cards where idType = 1 AND type = 2)`
+    const lastSixMinutes =  DateTime.local().minus({ minutes: 6 }).toFormat('yyyy-MM-dd HH:mm:ss')
+    const query = `SELECT id, email FROM users where deleted = 0 AND email != '' AND id NOT IN (SELECT idUser FROM cards where idType = 1 AND type = 2) OR timeOfRegistration > '${lastSixMinutes}'`
     const response = await this.idSecureDb.rawQuery(query)
     const users = response[0] || null
     if (!users || !users.length) {
@@ -188,7 +189,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
 
   public async createQrCode(userId) {
     Logger.debug(`createUserQrCode userId: ${userId}`)
-    return apiControlid.post(`/qrcode/userqrcode`, userId)
+    return apiControlid.post(`/qrcode/userqrcode`, userId.toString())
       .then(res =>  res.data || null)
     .catch((e)=>{
       Logger.error(`createUserQrCode Error  : ${JSON.stringify(e)}`)

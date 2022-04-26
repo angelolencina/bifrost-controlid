@@ -6,7 +6,7 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 :: Stopping and removing deskbee service
 call npm link node-windows
-node .\uninstall-desko-secureId-windows-service.js
+node .\uninstall-deskbee-service-windows.js
 :: Deskbee service stopped and removed
 PAUSE
 EXIT

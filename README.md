@@ -21,7 +21,7 @@ Este Gateway deverá ser instalado na mesma máquina na qual o IdSecure foi inst
 
 1. Conecte no Banco de Dados MySql  do Id Secure e crie uma database
 ```
-CREATE DATABASE desko_controlid
+CREATE DATABASE DESKBEE_controlid
 ```
 
 2. Faça checkout do Projeto e instale as dependencias
@@ -43,7 +43,7 @@ $ cp .env-example .env
 - Acesse o Painel Desko https://painel.desko.com.br
 - No painel desko acesse Crie um Aplicativo Client conforme documentação, https://developers.desko.com.br/referencia-api/autenticacao/criando-aplicativo
 - Libere os escopos **booking.show building.show organization.show**:
-- Copie o **clientid**, **client_secret** e os **escopos** para os atributos **DESKO_API_CLIENT_ID** e **DESKO_API_CLIENT_SECRET** no .env
+- Copie o **clientid**, **client_secret** e os **escopos** para os atributos **DESKBEE_API_CLIENT_ID** e **DESKBEE_API_CLIENT_SECRET** no .env
 - Crie um WebHook no Painel Desko, conforme documentação: https://developers.desko.com.br/webhook-iniciando
 - Copie a Chave de Assinatura no atributo **SIGNATURE** no .env
 ```
