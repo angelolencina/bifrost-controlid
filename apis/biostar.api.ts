@@ -17,11 +17,11 @@ apiBioStar.interceptors.request.use(async (config) => {
 });
 
 export const login = () => {
-  const User = {
+  const user = {
     login_id: Env.get("BIOSTAR_USER"),
     password: Env.get("BIOSTAR_PASSWORD")
   }
-  return axios.post(`${Env.get('BIOSTAR_API')}/login`, { User }, {
+  return axios.post(`${Env.get('BIOSTAR_API')}/login`, { User: user }, {
     httpsAgent: new https.Agent({
       rejectUnauthorized: false
     })
@@ -29,11 +29,13 @@ export const login = () => {
     .then(res => {
       return res.headers['bs-session-id']
     }).catch(err => {
+      console.log('response ', err.response.data)
       console.log('erro ', err)
     })
 }
 
 const getUserId = async (email: string) => {
+  console.log( `get userId by userEmail: ${email}`)
   const user = await searchUser(email)
   return user.user_id
 }
@@ -42,6 +44,7 @@ export const searchUser = (email: string) => {
   const body = {
     search_text: email
   }
+
   return apiBioStar.post(`/v2/users/search`, body).then(res => {
     const data = res.data
     if (data.UserCollection.total > 0) {
