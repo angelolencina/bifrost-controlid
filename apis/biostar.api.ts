@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { DateTime } from 'luxon'
+import Logger from '@ioc:Adonis/Core/Logger'
 import Env from '@ioc:Adonis/Core/Env'
 import { UpdateUserDto } from './dtos/user-update.dto';
 import * as https from 'https'
@@ -29,15 +31,17 @@ export const login = () => {
     .then(res => {
       return res.headers['bs-session-id']
     }).catch(err => {
-      console.log('response ', err.response.data)
-      console.log('erro ', err)
+      throw new Error(`erro login ${JSON.stringify(err.response.data)}`)
     })
 }
 
 const getUserId = async (email: string) => {
   console.log( `get userId by userEmail: ${email}`)
   const user = await searchUser(email)
-  return user.user_id
+  if(user){
+    return user.user_id
+  }
+  throw new Error('Error user does not exist');
 }
 
 export const searchUser = (email: string) => {
@@ -55,17 +59,19 @@ export const searchUser = (email: string) => {
 }
 
 export const updateUserDateLimits = async ({ email, start_date, end_date }) => {
+  const start_datetime = DateTime.fromJSDate(start_date).setZone("UTC+0", { keepLocalTime: true }).toISO()
+  const expiry_datetime  = DateTime.fromJSDate(end_date).setZone("UTC+0", { keepLocalTime: true }).toISO()
   const userId = await getUserId(email)
-  const data = { User: { start_datetime: start_date, expiry_datetime: end_date } }
+  const data = { User: { start_datetime , expiry_datetime} }
   return updateUser(userId, data)
 }
 
 export const updateUser = (id: number, updateUserDto: UpdateUserDto) => {
+  Logger.info(`Update UserId:  ${id}`)
   return apiBioStar.put(`/users/${id}`, updateUserDto).then(res => {
-    console.log("update", res.data)
     return res.data
   })
     .catch(err => {
-      console.log('erro ', err.response)
+      console.log('erro updateUser ', err.response.data)
     })
 }
