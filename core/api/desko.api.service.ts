@@ -1,7 +1,9 @@
 import Env from '@ioc:Adonis/Core/Env'
 import Logger from '@ioc:Adonis/Core/Logger'
 import { CheckInOutDto } from '../dto/desko.check-in-out.dto';
-const axios = require('axios')
+import axios from 'axios'
+import { PersonalBadgeDto } from '../dto/desko.personal-badge.dto';
+
 
 export default class DeskoApiService {
   private endpoint: string
@@ -68,7 +70,7 @@ export default class DeskoApiService {
   public async getBooking(uuid): Promise<object | boolean> {
     try {
       await this.auth()
-      const booking = await axios.get(`${this.endpoint}/v1.1/bookings/${uuid}`, {
+      const booking = await axios.get(`${this.endpoint}/v1.1/bookings/${uuid}?include=checkin;min_tolerance;image;documents`, {
         headers: {
           'Authorization': `Bearer ${this.accessToken}`,
           'Content-Type': `application/json; charset=UTF-8`,
@@ -80,6 +82,20 @@ export default class DeskoApiService {
       Logger.error(`Error API ${JSON.stringify(e)}`)
     }
     return false
+  }
+
+  public async sendPersonalBadge(personalBadgeDto:PersonalBadgeDto[]): Promise<any> {
+      await this.auth()
+      return  axios.post(`${this.endpoint}/v1.1/integrations/personal-badge`,personalBadgeDto, {
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Content-Type': `application/json; charset=UTF-8`,
+        },
+      }).then(res=> res.data.data)
+    .catch(e=> {
+      Logger.error(`Error Send PersonalBadge ${JSON.stringify(e)}`)
+      throw new Error(`Error Send PersonalBadge: ${e.message}`)
+    })
   }
 
   public async sendDeviceEvent(events: CheckInOutDto[]) {

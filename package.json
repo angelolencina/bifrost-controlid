@@ -8,7 +8,7 @@
     "start": "node ace migration:run --force=true no-plugins && node server.js",
     "lint": "eslint . --ext=.ts",
     "format": "prettier --write .",
-    "generate:executable":"npx link node-windows &&  npx pkg build/desko-secureId-windows-service.js"
+    "generate:executable": "npx link node-windows &&  npx pkg build/desko-secureId-windows-service.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^5.3.7",
@@ -42,7 +42,9 @@
   "pkg": {
     "scripts": "build/**/*.js",
     "assets": "views/**/*",
-    "targets": [ "node14-linux-arm64" ],
+    "targets": [
+      "node14-linux-arm64"
+    ],
     "outputPath": "dist"
   }
 }

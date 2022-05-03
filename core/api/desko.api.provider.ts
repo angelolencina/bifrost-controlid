@@ -7,6 +7,7 @@ import DeskoBuildingDto from '../dto/desko.building.dto'
 import DeskoFloorDto from '../dto/desko.floor.dto'
 import Logger from '@ioc:Adonis/Core/Logger'
 import { CheckInOutDto } from '../dto/desko.check-in-out.dto';
+import { PersonalBadgeDto } from '../dto/desko.personal-badge.dto'
 
 export default class DeskoApiProvider {
   // Ocupação Andamento
@@ -41,11 +42,11 @@ export default class DeskoApiProvider {
     this.event = payload.event
 
     Logger.info(`event: ${JSON.stringify(payload)}`)
-
     return await this.setEventContent()
   }
 
   public async setEventContent() {
+
     switch (this.event) {
       case 'booking':
         const payload = await this.service.getBooking(this.resource.uuid)
@@ -79,6 +80,7 @@ export default class DeskoApiProvider {
       place: this.getPlace(),
       floor: this.getFloor(),
       building: this.getBuilding(),
+      tolerance: this.payload.min_tolerance,
       created_at: new Date(this.payload.created_at),
       updated_at: new Date(this.payload.updated_at),
       deleted_at: this.payload.deleted_at ? new Date(this.payload.deleted_at) : null,
@@ -153,5 +155,14 @@ export default class DeskoApiProvider {
       name: this.payload.place.area.floor.name,
       is_active: this.payload.place.area.floor.is_active,
     }
+  }
+
+  public async generatePersonalBadge(personalBadgeDto:PersonalBadgeDto): Promise<PersonalBadgeDto> {
+    Logger.info(`generatePersonalBadge: ${JSON.stringify(personalBadgeDto)}`)
+    return this.service.sendPersonalBadge([personalBadgeDto]).then((res) => res[0])
+    .catch((err) => {
+      Logger.error(`generatePersonalBadge: ${JSON.stringify(err)}`)
+      throw new Error(`Error Send PersonalBadge`)
+    })
   }
 }
