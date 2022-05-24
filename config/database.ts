@@ -19,8 +19,7 @@ const databaseConfig: DatabaseConfig = {
   | file.
   |
   */
-  connection: !!Env.get('DATABASE_DRIVE') ? Env.get('DATABASE_DRIVE') : 'mysql',
-
+  connection: Env.get('DATABASE_DRIVE') ? Env.get('DATABASE_DRIVE') : 'sqlite',
 
   connections: {
     /*
@@ -38,16 +37,16 @@ const databaseConfig: DatabaseConfig = {
     sqlite: {
       client: 'sqlite3',
       connection: {
-        filename: './bifrost.sqlite'
+        filename: './bifrost.sqlite',
       },
-      useNullAsDefault: true
+      useNullAsDefault: true,
     },
     sqlite2: {
       client: 'sqlite3',
       connection: {
-        filename: Env.get('CONTROLID_DB_SQLITE_PATH')
+        filename: Env.get('CONTROLID_DB_SQLITE_PATH'),
       },
-      useNullAsDefault: true
+      useNullAsDefault: true,
     },
     mysql: {
       client: 'mysql2',

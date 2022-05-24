@@ -3,14 +3,13 @@ import DeskoCore from '../core/desko.core'
 import Env from '@ioc:Adonis/Core/Env'
 import Logger from '@ioc:Adonis/Core/Logger'
 import { MysqlConfig, SqliteConfig } from '@ioc:Adonis/Lucid/Database'
-import { TypeEventControlid } from '../core/interfaces/type-event-controlid';
-import { parseEntryRecords } from '../core/utils/mapper-entry-records';
+import { TypeEventControlid } from '../core/interfaces/type-event-controlid'
+import { parseEntryRecords } from '../core/utils/mapper-entry-records'
 import axios from 'axios'
 import * as https from 'https'
-import { apiControlid } from '../apis/controlid.api';
+import { apiControlid } from '../apis/controlid.api'
 import DeskoEventDto from '../core/dto/desko.event.dto'
 import { isToday } from '../core/utils/is-today'
-
 
 export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   private idSecureDb: any
@@ -57,7 +56,6 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     }
     this.saveCache(event)
   }
-
 
   private declinedAccess(event) {
     this.persist().booking().delete(event.uuid)
@@ -113,8 +111,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   private configConnection(): SqliteConfig | boolean | MysqlConfig | any {
-
-    if (Env.get('CONTROLID_DB_CONNECTION') == 'sqlite') {
+    if (Env.get('CONTROLID_DB_CONNECTION') === 'sqlite') {
       return {
         client: 'sqlite3',
         connection: { filename: Env.get('CONTROLID_DB_SQLITE_PATH') },
@@ -127,14 +124,14 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     }
 
     return {
-        client: 'mysql',
-        connection: {
-          host: Env.get('CONTROLID_MYSQL_HOST'),
-          port: Env.get('CONTROLID_MYSQL_PORT'),
-          user: Env.get('CONTROLID_MYSQL_USER'),
-          password: Env.get('CONTROLID_MYSQL_PASSWORD'),
-          database: Env.get('CONTROLID_MYSQL_DB_NAME'),
-        }
+      client: 'mysql',
+      connection: {
+        host: Env.get('CONTROLID_MYSQL_HOST'),
+        port: Env.get('CONTROLID_MYSQL_PORT'),
+        user: Env.get('CONTROLID_MYSQL_USER'),
+        password: Env.get('CONTROLID_MYSQL_PASSWORD'),
+        database: Env.get('CONTROLID_MYSQL_DB_NAME'),
+      },
     }
   }
 
@@ -164,13 +161,12 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     }
   }
 
-
   public async eventUserQrCode() {
     /*
     idType: Representa se o tag está destinado a uma pessoa ou veículo, caso tenha o valor 1 = pessoa, caso tenha o valor 2 = veículo
     type: Tecnologia do cartão: "0" para ASK/125kHz, "1" para Mifare e "2" para QR-Code.
     */
-    const lastSixMinutes =  DateTime.local().minus({ minutes: 6 }).toFormat('yyyy-MM-dd HH:mm:ss')
+    const lastSixMinutes = DateTime.local().minus({ minutes: 6 }).toFormat('yyyy-MM-dd HH:mm:ss')
     const query = `SELECT id, email FROM users where deleted = 0 AND email != '' AND id NOT IN (SELECT idUser FROM cards where idType = 1 AND type = 2) OR timeOfRegistration > '${lastSixMinutes}'`
     const response = await this.idSecureDb.rawQuery(query)
     const users = response[0] || null
@@ -191,13 +187,13 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       payload.push({
         identifier_type: 'email',
         identifier: user.email,
-        code: code
+        code: code,
       })
 
       this.syncUser(user.id)
     }
 
-    this.service().api('POST', 'integrations/personal-badge', payload)
+    this.service().sendPersonalBadge(payload)
   }
 
   public async getUser(email: string) {
@@ -206,7 +202,8 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       .from('users')
       .where('email', 'LIKE', email)
       .orWhere('email', 'LIKE', email.toUpperCase())
-      .where('deleted', 0).first()
+      .where('deleted', 0)
+      .first()
 
     if (!user) {
       Logger.info(`userAccessLimit : ${email} not found`)
@@ -219,19 +216,23 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   public async checkEntryRecords() {
-    const lastRecords = await this.getUserPassLogs() || []
+    const lastRecords = (await this.getUserPassLogs()) || []
     Logger.info(`AutomateCheckin : ${lastRecords.length} checkinEvents`)
-    this.provider().automateCheckin(lastRecords)?.then(() => {
-      this.persist().entryRecord().save(TypeEventControlid.Pass)
-    })
-      .catch(error => {
+    this.provider()
+      .automateCheckin(lastRecords)
+      ?.then(() => {
+        this.persist().entryRecord().save(TypeEventControlid.Pass)
+      })
+      .catch((error) => {
         Logger.info(`Erro ao enviar checkin: ${error}`)
       })
   }
 
   public async getUserPassLogs() {
     await this.syncAll()
-    const lastDateRecord = await this.persist().entryRecord().getDatetimeLastRecord(TypeEventControlid.Pass)
+    const lastDateRecord = await this.persist()
+      .entryRecord()
+      .getDatetimeLastRecord(TypeEventControlid.Pass)
     const query = `SELECT u.id, u.email, u.name, l.idDevice, l.deviceName, l.reader, l.idArea, l.area, l.event, l.time
     FROM Logs l
     INNER JOIN Users u ON l.idUser = u.id
@@ -253,12 +254,13 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       .from('users')
       .where('id', user.id)
       .update({
-        dateStartLimit: DateTime.fromJSDate(start_date).startOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
+        dateStartLimit: DateTime.fromJSDate(start_date)
+          .startOf('day')
+          .toFormat('yyyy-MM-dd HH:mm:ss'),
         dateLimit: DateTime.fromJSDate(end_date).endOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
       })
-      this.syncAll()
+    this.syncAll()
   }
-
 
   public async syncAll() {
     const url = `${Env.get('CONTROLID_API')}/util/SyncAll`
@@ -279,24 +281,25 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
 
   public async createQrCode(userId) {
     Logger.debug(`createUserQrCode userId: ${userId}`)
-    return apiControlid.post(`/qrcode/userqrcode`, userId.toString())
-      .then(res =>  res.data || null)
-    .catch((e)=>{
-      Logger.error(`createUserQrCode Error  : ${JSON.stringify(e)}`)
-    })
+    return apiControlid
+      .post(`/qrcode/userqrcode`, userId.toString())
+      .then((res) => res.data || null)
+      .catch((e) => {
+        Logger.error(`createUserQrCode Error  : ${JSON.stringify(e)}`)
+      })
   }
 
-
-  public async syncUser(userId):Promise<void> {
+  public async syncUser(userId): Promise<void> {
     Logger.debug(`syncUser: controlid userId:${userId}`)
-    apiControlid.get(`/util/SyncUser/${userId}`)
-    .then(res=>{
-      Logger.debug(`Result : ${res.statusText} (${res.status})`)
-      Logger.debug(`Payload: ${JSON.stringify(res.data)}`)
-      return res.data
-    })
-    .catch((e)=>{
-      Logger.error(`createUserQrCode Error  : ${JSON.stringify(e)}`)
-    })
+    apiControlid
+      .get(`/util/SyncUser/${userId}`)
+      .then((res) => {
+        Logger.debug(`Result : ${res.statusText} (${res.status})`)
+        Logger.debug(`Payload: ${JSON.stringify(res.data)}`)
+        return res.data
+      })
+      .catch((e) => {
+        Logger.error(`createUserQrCode Error  : ${JSON.stringify(e)}`)
+      })
   }
 }
