@@ -6,6 +6,8 @@ export default interface DeskoBookingDto {
   uuid: string
   start_date: Date
   end_date: Date
+  end_checkin: Date
+  start_checkin: Date
   state: string
   action: string
   person: DeskoPersonDto

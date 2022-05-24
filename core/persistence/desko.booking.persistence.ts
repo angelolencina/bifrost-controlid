@@ -28,6 +28,10 @@ export default class DeskoBookingPersistence {
       })
   }
 
+  public async findOne(uuid: string) {
+    return Database.from('bookings').where('uuid', uuid).first()
+  }
+
   public query() {
     return Database.from('bookings')
   }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import DeskoEventDto from '../dto/desko.event.dto'
 import DeskoPersonDto from '../dto/desko.person.dto'
 import DeskoBookingDto from '../dto/desko.booking.dto'
@@ -6,7 +7,7 @@ import DeskoApiService from './desko.api.service'
 import DeskoBuildingDto from '../dto/desko.building.dto'
 import DeskoFloorDto from '../dto/desko.floor.dto'
 import Logger from '@ioc:Adonis/Core/Logger'
-import { CheckInOutDto } from '../dto/desko.check-in-out.dto';
+import { CheckInOutDto } from '../dto/desko.check-in-out.dto'
 import { PersonalBadgeDto } from '../dto/desko.personal-badge.dto'
 
 export default class DeskoApiProvider {
@@ -46,7 +47,6 @@ export default class DeskoApiProvider {
   }
 
   public async setEventContent() {
-
     switch (this.event) {
       case 'booking':
         const payload = await this.service.getBooking(this.resource.uuid)
@@ -69,18 +69,27 @@ export default class DeskoApiProvider {
     }
   }
 
+  public setDateBytolerance(date: string, tolerance: number) {
+    let newDate = new Date(date)
+    newDate.setMinutes(newDate.getMinutes() - tolerance)
+    return newDate
+  }
+
   public getEventBooking(): DeskoBookingDto {
+    const tolerance = this.payload?.min_tolerance || 15
     return {
       uuid: this.payload.uuid,
       start_date: new Date(this.payload.start_date),
       end_date: new Date(this.payload.end_date),
+      end_checkin: this.setDateBytolerance(this.payload.end_date, tolerance),
+      start_checkin: this.setDateBytolerance(this.payload.start_date, tolerance),
       state: this.getState(),
       action: this.getAction(),
       person: this.getPerson(),
       place: this.getPlace(),
       floor: this.getFloor(),
       building: this.getBuilding(),
-      tolerance: this.payload.min_tolerance,
+      tolerance: tolerance,
       created_at: new Date(this.payload.created_at),
       updated_at: new Date(this.payload.updated_at),
       deleted_at: this.payload.deleted_at ? new Date(this.payload.deleted_at) : null,
@@ -96,7 +105,7 @@ export default class DeskoApiProvider {
   }
 
   public automateCheckin(events: CheckInOutDto[]) {
-    if(!events.length) {
+    if (!events.length) {
       return
     }
     return this.service.sendDeviceEvent(events)
@@ -157,12 +166,16 @@ export default class DeskoApiProvider {
     }
   }
 
-  public async generatePersonalBadge(personalBadgeDto:PersonalBadgeDto): Promise<PersonalBadgeDto> {
+  public async generatePersonalBadge(
+    personalBadgeDto: PersonalBadgeDto
+  ): Promise<PersonalBadgeDto> {
     Logger.info(`generatePersonalBadge: ${JSON.stringify(personalBadgeDto)}`)
-    return this.service.sendPersonalBadge([personalBadgeDto]).then((res) => res[0])
-    .catch((err) => {
-      Logger.error(`generatePersonalBadge: ${JSON.stringify(err)}`)
-      throw new Error(`Error Send PersonalBadge`)
-    })
+    return this.service
+      .sendPersonalBadge([personalBadgeDto])
+      .then((res) => res[0])
+      .catch((err) => {
+        Logger.error(`generatePersonalBadge: ${JSON.stringify(err)}`)
+        throw new Error(`Error Send PersonalBadge`)
+      })
   }
 }
