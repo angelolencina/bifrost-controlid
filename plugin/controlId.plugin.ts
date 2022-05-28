@@ -48,6 +48,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     const event = await this.provider().runEvent(deskoEvent)
     if (!event) {
       Logger.error('Event NotFound')
+      return
     }
 
     if (event.action === 'deleted') {

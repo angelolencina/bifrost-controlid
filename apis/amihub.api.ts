@@ -10,21 +10,28 @@ export const apiAmiHub = axios.create({
   },
 })
 
-export const hubAddReserve = (event, payload) => {
-  Logger.info(`hubAddTouchDisplay: ${JSON.stringify(payload)}`)
+export const hubAddReserve = (placeUuid, payload) => {
+  Logger.info(`hubAddReserve: ${JSON.stringify(payload)}`)
   return apiAmiHub
-    .post(`/region/${event.place.uuid}/reserve`, payload)
-    .then((res) => res.data.payload)
+    .post(`/region/${placeUuid}/reserve`, payload)
+    .then((res) => {
+      if (res?.data?.payload?.objects) {
+        const reserve = res.data.payload.objects[0]['region.reserve']
+        const response = res.data.payload
+        return [reserve, response]
+      }
+      return []
+    })
     .catch((e) => {
-      Logger.info(`Error hubAddTouchDisplay  : ${e.message} (${e.response.status}))`)
+      Logger.info(`Error hubAddReserve  : ${e.message} (${e.response.status}))`)
       Logger.info(`Payload: ${JSON.stringify(e.response.data)}`)
-      throw new Error(`Error hubAddTouchDisplay`)
+      throw new Error(`Error hubAddReserve`)
     })
 }
 
-export const hubCancelReserve = (eventPlaceId, bookingExternalId) => {
-  Logger.info(`hubCancelTouchDisplay: ${eventPlaceId}, ${bookingExternalId}`)
-  apiAmiHub.delete(`/region/${eventPlaceId}/reserve/${bookingExternalId}`).catch((e) => {
+export const hubCancelReserve = async (event, bookingExternalId) => {
+  Logger.info(`hubCancelReserve: ${event.place.uuid}, ${bookingExternalId}`)
+  apiAmiHub.delete(`/region/${event.place.uuid}/reserve/${bookingExternalId}`).catch((e) => {
     Logger.info(`Error hubCancelTouchDisplay  : ${e.message} (${e.response.status}))`)
     Logger.info(`Payload: ${JSON.stringify(e.response.data)}`)
     throw new Error(`Error hubCancelTouchDisplay`)
