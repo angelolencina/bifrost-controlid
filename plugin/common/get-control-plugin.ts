@@ -1,8 +1,8 @@
 import Env from '@ioc:Adonis/Core/Env'
-import AmiHubPlugin from '../ami-hub.plugin';
-import BioStarPlugin from '../biostar.plugin';
-import ControlidPlugin from '../controlId.plugin';
-import Logger from '@ioc:Adonis/Core/Logger';
+import AmiHubPlugin from '../ami-hub.plugin'
+import BioStarPlugin from '../biostar.plugin'
+import ControlidPlugin from '../controlId.plugin'
+import Logger from '@ioc:Adonis/Core/Logger'
 
 export const getPluginControl = () => {
   switch (Env.get('PLUGIN')) {
