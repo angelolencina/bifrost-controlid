@@ -50,8 +50,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       Logger.error('Event NotFound')
       return
     }
-
-    if (event.action === 'deleted') {
+    if (event.action === 'deleted' || event.state === 'fall') {
       this.declinedAccess(event)
       return
     }
@@ -201,9 +200,10 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     const user = await this.idSecureDb
       .query()
       .from('users')
-      .where('email', 'LIKE', email)
-      .orWhere('email', 'LIKE', email.toUpperCase())
       .where('deleted', 0)
+      .andWhere('email', 'LIKE', email)
+      .orWhere('email', 'LIKE', email.toUpperCase())
+      .orderBy('id', 'desc')
       .first()
 
     if (!user) {
@@ -243,7 +243,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   public async userAccessLimit({ email, start_date, end_date }) {
-    Logger.debug(`userAccessLimit : ${email} : ${start_date}:${end_date}`)
+    Logger.info(`userAccessLimit : ${email} : ${start_date}:${end_date}`)
 
     const user = await this.getUser(email)
     if (!user) {
