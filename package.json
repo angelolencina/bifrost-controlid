@@ -8,6 +8,7 @@
     "start": "node ace migration:run --force=true no-plugins && node server.js",
     "lint": "eslint . --ext=.ts",
     "format": "prettier --write .",
+    "exposer": "ngrok http 3000 -subdomain=lencina",
     "generate:executable": "npx link node-windows &&  npx pkg build/desko-secureId-windows-service.js"
   },
   "devDependencies": {
@@ -33,6 +34,7 @@
     "mysql": "^2.18.1",
     "mysql2": "^2.3.0",
     "node-schedule": "^2.0.0",
+    "node-windows": "^1.0.0-beta.8",
     "proxy-addr": "^2.0.7",
     "reflect-metadata": "^0.1.13",
     "source-map-support": "^0.5.20",

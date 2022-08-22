@@ -7,7 +7,7 @@ Route.get('/', () => {
 
 Route.post('/events', async (ctx) => {
   return new EventController().index(ctx)
-}).middleware('signature')
+}).middleware('signature') 
 
 Route.get('/ping', () => {
   return 'pong'
