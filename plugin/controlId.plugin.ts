@@ -10,7 +10,6 @@ import * as https from 'https'
 import { apiControlid } from '../apis/controlid.api'
 import DeskoEventDto from '../core/dto/desko.event.dto'
 import { isToday } from '../core/utils/is-today'
-const EventLogger = require('node-windows').EventLogger
 export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   private idSecureDb: any
 
@@ -37,7 +36,6 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     const settings = this.configConnection()
     if (!settings) {
       Logger.warn(`connIdSecureDb: DB invalid data`)
-      EventLogger.info(`connIdSecureDb: DB invalid data`)
       return false
     }
     this.idSecureDb = this.database('controlIdDatabaseConnection', settings)
@@ -46,7 +44,6 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
 
   private async eventAccessControl(deskoEvent: DeskoEventDto) {
     Logger.debug(`event: eventAccessControl ${JSON.stringify(deskoEvent)}`)
-    EventLogger.info(`event: eventAccessControl ${JSON.stringify(deskoEvent)}`)
     const event = await this.provider().runEvent(deskoEvent)
     if (!event) {
       Logger.error('Event NotFound')
@@ -101,7 +98,6 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
 
   public async userSaveQrCode(userId: number, number: string) {
     Logger.debug(`userSaveQrCode : ${userId} : ${number}`)
-    EventLogger.info(`userSaveQrCode : ${userId} : ${number}`)
     const query = `
     INSERT INTO cards (
       idUser, idType, type, number, numberStr
