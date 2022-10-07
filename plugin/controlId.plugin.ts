@@ -35,7 +35,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   private connIdSecureDb() {
     const settings = this.configConnection()
     if (!settings) {
-      Logger.warn(`connIdSecureDb: DB invalid data`)
+      Logger.info(`connIdSecureDb: DB invalid data`)
       return false
     }
     this.idSecureDb = this.database('controlIdDatabaseConnection', settings)
@@ -43,7 +43,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   private async eventAccessControl(deskoEvent: DeskoEventDto) {
-    Logger.debug(`event: eventAccessControl ${JSON.stringify(deskoEvent)}`)
+    Logger.info(`event: eventAccessControl ${JSON.stringify(deskoEvent)}`)
     const event = await this.provider().runEvent(deskoEvent)
     if (!event) {
       Logger.error('Event NotFound')
@@ -97,7 +97,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   public async userSaveQrCode(userId: number, number: string) {
-    Logger.debug(`userSaveQrCode : ${userId} : ${number}`)
+    Logger.info(`userSaveQrCode : ${userId} : ${number}`)
     const query = `
     INSERT INTO cards (
       idUser, idType, type, number, numberStr
@@ -178,7 +178,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     for (const user of users) {
       const code = await this.createQrCode(user.id)
       if (!code) {
-        Logger.debug(`event: user:${user.id} code not found}`)
+        Logger.info(`event: user:${user.id} code not found}`)
         continue
       }
 
@@ -264,7 +264,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
 
   public async syncAll() {
     const url = `${Env.get('CONTROLID_API')}/util/SyncAll`
-    Logger.debug(`syncAll: ${url}`)
+    Logger.info(`syncAll: ${url}`)
     try {
       const result = await axios({
         httpsAgent: new https.Agent({
@@ -273,14 +273,14 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
         method: 'GET',
         url: url,
       })
-      Logger.debug(`syncAll Result : ${result.statusText} (${result.status})`)
+      Logger.info(`syncAll Result : ${result.statusText} (${result.status})`)
     } catch (e) {
       Logger.error(`syncAll Error  : ${JSON.stringify(e)}`)
     }
   }
 
   public async createQrCode(userId) {
-    Logger.debug(`createUserQrCode userId: ${userId}`)
+    Logger.info(`createUserQrCode userId: ${userId}`)
     return apiControlid
       .post(`/qrcode/userqrcode`, userId.toString())
       .then((res) => res.data || null)
@@ -290,12 +290,12 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   public async syncUser(userId): Promise<void> {
-    Logger.debug(`syncUser: controlid userId:${userId}`)
+    Logger.info(`syncUser: controlid userId:${userId}`)
     apiControlid
       .get(`/util/SyncUser/${userId}`)
       .then((res) => {
-        Logger.debug(`Result : ${res.statusText} (${res.status})`)
-        Logger.debug(`Payload: ${JSON.stringify(res.data)}`)
+        Logger.info(`Result : ${res.statusText} (${res.status})`)
+        Logger.info(`Payload: ${JSON.stringify(res.data)}`)
         return res.data
       })
       .catch((e) => {

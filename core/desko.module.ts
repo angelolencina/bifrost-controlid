@@ -11,7 +11,7 @@ export default class DeskoModule {
   }
 
   public async event(payload: DeskoEventDto) {
-    Logger.debug(`event: ${JSON.stringify(payload)}`)
+    Logger.info(`event: ${JSON.stringify(payload)}`)
     Event.emit(`webhook:${payload.event}`, payload)
   }
 }

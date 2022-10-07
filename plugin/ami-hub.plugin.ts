@@ -42,7 +42,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   private async eventAccessControl(deskoEvent: DeskoEventDto) {
-    Logger.debug(`event: eventAccessControl ${JSON.stringify(deskoEvent)}`)
+    Logger.info(`event: eventAccessControl ${JSON.stringify(deskoEvent)}`)
     const event = await this.provider().runEvent(deskoEvent)
     if (!event) {
       Logger.error('Event NotFound')
