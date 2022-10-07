@@ -1,0 +1,61 @@
+{
+  "name": "pm2-installer",
+  "version": "3.4.0",
+  "description": "Install pm2 offline as a service on Windows or Linux",
+  "license": "MIT",
+  "author": "Jesse Youngblood",
+  "homepage": "https://github.com/jessety/pm2-installer#readme",
+  "bugs": {
+    "url": "https://github.com/jessety/pm2-installer/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jessety/pm2-installer.git"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/jessety"
+  },
+  "scripts": {
+    "preinstall": "echo WARNING: Running install in this project is not necessary. See README.",
+    "lint": "eslint . && editorconfig-checker .",
+    "info": "node ./src/bundle-info/current.js",
+    "info-config": "PowerShell -NoProfile -ExecutionPolicy Bypass src\\windows\\info-config.ps1",
+    "info-service": "PowerShell -NoProfile -ExecutionPolicy Bypass src\\windows\\info-service.ps1",
+    "bundle": "node ./src/tools/script-for-os.js",
+    "bundle:windows": "PowerShell -NoProfile -ExecutionPolicy Bypass src\\windows\\bundle.ps1",
+    "bundle:unix": "bash ./src/unix/bundle.sh",
+    "bundle:default": "echo 'ERROR: Could not detect host platform'",
+    "unbundle": "node ./src/tools/script-for-os.js",
+    "unbundle:windows": "PowerShell -NoProfile -ExecutionPolicy Bypass src\\windows\\unbundle.ps1",
+    "unbundle:unix": "bash ./src/unix/unbundle.sh",
+    "unbundle:default": "echo 'ERROR: Could not detect host platform'",
+    "configure": "node ./src/tools/script-for-os.js",
+    "configure:windows": "PowerShell -NoProfile -ExecutionPolicy Bypass src\\windows\\configure-setup.ps1",
+    "configure:default": "echo 'Altering npm configuration not necessary for this platform.';",
+    "configure-policy": "node ./src/tools/script-for-os.js",
+    "configure-policy:windows": "PowerShell -NoProfile -ExecutionPolicy Bypass src\\windows\\configure-policy-shell.ps1",
+    "configure-policy:default": "echo 'Altering PowerShell execution policy not necessary for this platform.';",
+    "deconfigure": "node ./src/tools/script-for-os.js",
+    "deconfigure:windows": "PowerShell -NoProfile -ExecutionPolicy Bypass src\\windows\\configure-remove.ps1",
+    "deconfigure:default": "echo 'Altering npm configuration not necessary for this platform.';",
+    "setup": "node ./src/tools/script-for-os.js",
+    "setup:windows": "PowerShell -NoProfile -ExecutionPolicy Bypass src\\windows\\setup.ps1",
+    "setup:unix": "bash ./src/unix/setup.sh",
+    "setup:default": "echo 'ERROR: Could not detect host platform'",
+    "remove": "node ./src/tools/script-for-os.js",
+    "remove:windows": "PowerShell -NoProfile -ExecutionPolicy Bypass src\\windows\\remove.ps1",
+    "remove:unix": "bash ./src/unix/remove.sh",
+    "remove:default": "echo 'ERROR: Could not detect host platform'"
+  },
+  "dependencies": {
+    "@jessety/pm2-logrotate": "^2.7.1",
+    "node-windows": "1.0.0-beta.6",
+    "pm2": "5.2.0"
+  },
+  "devDependencies": {
+    "@jessety/eslint-config": "^1.0.8",
+    "editorconfig-checker": "^4.0.2",
+    "eslint": "^8.14.0"
+  }
+}
