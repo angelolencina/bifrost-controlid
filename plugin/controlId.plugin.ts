@@ -91,8 +91,8 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     this.persist().booking().setSync(event.uuid)
     this.userAccessLimit({
       email: event.person.email,
-      start_date: DateTime.fromJSDate(new Date(event.start_date)).toFormat('yyyy-MM-dd 00:00:00'),
-      end_date: DateTime.fromJSDate(new Date(event.end_date)).toFormat('yyyy-MM-dd 23:59:00'),
+      start_date: event.start_date,
+      end_date: event.end_date,
     })
   }
 
@@ -154,10 +154,8 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       this.persist().booking().setSync(booking.uuid)
       this.userAccessLimit({
         email: booking.person.email,
-        start_date: DateTime.fromJSDate(new Date(booking.start_date)).toFormat(
-          'yyyy-MM-dd 00:00:00'
-        ),
-        end_date: DateTime.fromJSDate(new Date(booking.end_date)).toFormat('yyyy-MM-dd 23:59:00'),
+        start_date: booking.start_date,
+        end_date: booking.end_date,
       })
     }
   }
