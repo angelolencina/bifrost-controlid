@@ -10,6 +10,7 @@ import * as https from 'https'
 import { apiControlid } from '../apis/controlid.api'
 import DeskoEventDto from '../core/dto/desko.event.dto'
 import { isToday } from '../core/utils/is-today'
+import { beginDay, endDay } from './common/utils';
 export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   private idSecureDb: any
 
@@ -91,8 +92,8 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     this.persist().booking().setSync(event.uuid)
     this.userAccessLimit({
       email: event.person.email,
-      start_date: event.start_date,
-      end_date: event.end_date,
+      start_date: beginDay(event.start_date),
+      end_date: endDay(event.end_date),
     })
   }
 
@@ -154,8 +155,8 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       this.persist().booking().setSync(booking.uuid)
       this.userAccessLimit({
         email: booking.person.email,
-        start_date: booking.start_date,
-        end_date: booking.end_date,
+        start_date: beginDay(booking.start_date),
+        end_date: endDay(booking.end_date),
       })
     }
   }

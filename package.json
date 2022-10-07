@@ -5,11 +5,12 @@
   "scripts": {
     "dev": "node ace migration:run --force=true no-plugins && node ace serve --watch",
     "build": "node ace build --production",
-    "start": "node ace migration:run --force=true no-plugins && node server.js",
+    "start": "pm2 node build/server.js --name deskbee-gateway",
     "lint": "eslint . --ext=.ts",
     "format": "prettier --write .",
-    "exposer": "ngrok http 3000 -subdomain=lencina",
-    "generate:executable": "npx link node-windows &&  npx pkg build/desko-secureId-windows-service.js"
+    "exposer": "ngrok http 3000 --subdomain=lencina",
+    "generate:executable": "npx link node-windows &&  npx pkg build/desko-secureId-windows-service.js",
+    "update": "git pull && npm run build && pm2 restart all"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^5.3.7",
