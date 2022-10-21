@@ -2,10 +2,14 @@ import axios from 'axios'
 import Env from '@ioc:Adonis/Core/Env'
 import { PersonalBadgeDto } from '../core/dto/desko.personal-badge.dto'
 import { CheckInOutDto } from '../core/dto/desko.check-in-out.dto'
+import * as https from 'https'
 
 export const apiDeskbee = axios.create({
   baseURL: Env.get('DESKBEE_API_URL'),
   headers: { 'Content-Type': `application/json; charset=UTF-8` },
+  httpsAgent: new https.Agent({
+    rejectUnauthorized: false,
+  }),
 })
 
 apiDeskbee.interceptors.request.use(
@@ -30,6 +34,9 @@ const getBearerToken = () => {
       },
       {
         headers: { 'Content-Type': `application/json; charset=UTF-8` },
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false,
+        }),
       }
     )
     .then((res) => (res.data?.access_token ? `Bearer ${res.data.access_token}` : null))
