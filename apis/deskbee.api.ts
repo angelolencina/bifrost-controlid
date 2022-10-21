@@ -1,6 +1,5 @@
 import axios from 'axios'
 import Env from '@ioc:Adonis/Core/Env'
-import Logger from '@ioc:Adonis/Core/Logger'
 import { PersonalBadgeDto } from '../core/dto/desko.personal-badge.dto'
 import { CheckInOutDto } from '../core/dto/desko.check-in-out.dto'
 
