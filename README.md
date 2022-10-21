@@ -11,9 +11,10 @@ Esta versão é compatível com IdSecure da ControlId: https://www.controlid.com
 ### Pré-requisitos
 
 Para ambiente Dev, você vai precisar ter instalado em sua máquina as seguintes ferramentas:
-- [Git](https://git-scm.com),
+- [Git](https://git-scm.com)
+  - [windows] (https://github.com/git-for-windows/git/releases/download/v2.38.1.windows.1/Git-2.38.1-64-bit.exe)
 - [Node.js](https://nodejs.org/en/).
-  - windows: https://nodejs.org/dist/v14.20.0/node-v14.20.0-x64.msi
+  - [windows] (https://nodejs.org/dist/v14.20.0/node-v14.20.0-x64.msi)
 - [VSCode](https://code.visualstudio.com/)
 - [HeidiSQL](https://www.heidisql.com/download.php)
 ### 🎲 Rodando Serviço
