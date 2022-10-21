@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "node ace migration:run --force=true no-plugins && node ace serve --watch",
+    "dev": "node ace serve --watch",
     "build": "node ace build --production",
     "start": "pm2 node build/server.js --name deskbee-gateway",
     "lint": "eslint . --ext=.ts",
