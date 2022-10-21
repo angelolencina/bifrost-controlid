@@ -12,24 +12,22 @@ Esta versão é compatível com IdSecure da ControlId: https://www.controlid.com
 
 Para ambiente Dev, você vai precisar ter instalado em sua máquina as seguintes ferramentas:
 - [Git](https://git-scm.com),
-- [Node.js](https://nodejs.org/en/). 
+- [Node.js](https://nodejs.org/en/).
+  - windows: https://nodejs.org/dist/v14.20.0/node-v14.20.0-x64.msi
 - [VSCode](https://code.visualstudio.com/)
-
+- [HeidiSQL](https://www.heidisql.com/download.php)
 ### 🎲 Rodando Serviço
 
 Este Gateway deverá ser instalado na mesma máquina na qual o IdSecure foi instalado:
 
-1. Conecte no Banco de Dados MySql  do Id Secure e crie uma database
-```
-CREATE DATABASE DESKBEE_controlid
 ```
 
 2. Faça checkout do Projeto e instale as dependencias
 
 ```bash
-$ git clone <https://github.com/deskbee/bifrost-controlid>
-$ cd bifrost-controlid/build
 $ npm ci --production
+$ npm run build
+$ npm i -g pm2
 ```
 
 3. Configurar .env
@@ -55,27 +53,31 @@ $ cp .env-example .env
 - Informe no .env os dados de conexão Banco de dados; **DB_MYSQL_***
 - Configure o .env informando os dados de conexao Banco de Dados do ControlID **CONTROLID_MYSQL_HOST**
 
-6. Execute as Migrations
-```
-$ node ace migration:run no-plugins
-```
+6. Inicie o Ser
+
+```bash
+
+6. Crie um nova pasta **C:\etc\.pm2**
+- crie uma pasta para gravar os logs do pm2  C:\etc\.pm2
 
 7. Rodando Aplicaco
 ```
-$ node server.js
+$ ./pm2_start_up.sh
 ```
 
 O servidor inciará na porta:3000 - acesse <http://<ip da maquina>:3000/ping> para testar
 
 
-## Instalando como Serviço no Windows:
+## Criando uma tarefa agendada( Task manager ) no Windows:
 
 ```
-$ npm i -g node-windows@1.0.0-beta.6
-$ npm link node-windows
-
-node install-windows-service.js
-node unistall-windows-service.js
+Create Task Scheduler
+Open Task Scheduler and click ‘Create Task’.
+Fill the task name and choose ‘Run whether user is logged on or not’
+Move to the next tab, add new Trigger. Set the begin task ‘At Startup’ and click OK.
+Add new Action to Start a Program and browse the Batch File Location (“pm2_startup.bat”) and click OK.
+Left the check fields inside Conditions tab unchecked.
+After all is set, then click OK to create this Task.
 ```
 
 ### 🛠 Tecnologias
