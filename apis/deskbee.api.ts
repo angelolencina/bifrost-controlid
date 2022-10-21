@@ -35,9 +35,7 @@ const getBearerToken = () => {
     )
     .then((res) => (res.data?.access_token ? `Bearer ${res.data.access_token}` : null))
     .catch((e) => {
-      Logger.error(`Error getBearerToken ${e.response.statusText}: (${e.response.status})`)
-      Logger.error(`Error getBearerToken ${e.response.config.ur}`)
-      Logger.error(`Error getBearerToken ${JSON.stringify(e.response.data)}`)
+      console.log('ERROR', e)
       throw new Error(`Error get token: ${e.response.statusText} (${e.response.status})`)
     })
 }
@@ -47,9 +45,7 @@ export const findOneBooking = (uuid) => {
     .get(`/v1.1/bookings/${uuid}?include=checkin;min_tolerance;image;documents`)
     .then((res) => res.data.data)
     .catch((e) => {
-      Logger.error(`Error findOneBooking ${e.response.statusText}: (${e.response.status})`)
-      Logger.error(`Error findOneBooking ${e.response.config.ur}`)
-      Logger.error(`Error findOneBooking ${JSON.stringify(e.response.data)}`)
+      console.log('ERROR', e)
       throw new Error(`Error GetBooking: ${e.message}`)
     })
 }
@@ -59,9 +55,7 @@ export const registerPersonalBadge = (personalBadgeDto: PersonalBadgeDto[]): Pro
     .post(`/v1.1/integrations/personal-badge`, personalBadgeDto)
     .then((res) => res.data.data)
     .catch((e) => {
-      Logger.error(`Error registerPersonalBadge ${e.response.statusText}: (${e.response.status})`)
-      Logger.error(`Error registerPersonalBadge ${e.response.config.ur}`)
-      Logger.error(`Error registerPersonalBadge ${JSON.stringify(e.response.data)}`)
+      console.log('ERROR', e)
       throw new Error(`Error Send PersonalBadge: ${e.message}`)
     })
 }
@@ -71,9 +65,7 @@ export const checkinByUser = (events: CheckInOutDto[]) => {
     .post(`/v1.1/integrations/checkin`, events)
     .then((res) => res.data)
     .catch((e) => {
-      Logger.error(`Error checkinByUser ${e.response.statusText}: (${e.response.status})`)
-      Logger.error(`Error checkinByUser ${e.response.config.ur}`)
-      Logger.error(`Error checkinByUser ${JSON.stringify(e.response.data)}`)
+      console.log('ERROR', e)
       throw new Error(`Erro ao enviar eventos de checkin: ${e.message}`)
     })
 }
