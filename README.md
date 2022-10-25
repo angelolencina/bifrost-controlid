@@ -92,4 +92,5 @@ As seguintes ferramentas foram usadas na construção do projeto:
 
 
 git update-index --assume-unchanged
-
+git -c http.sslVerify=false clone [URL]
+git config --global http.sslVerify false
