@@ -10,7 +10,7 @@ import * as https from 'https'
 import { apiControlid } from '../apis/controlid.api'
 import DeskoEventDto from '../core/dto/desko.event.dto'
 import { isToday } from '../core/utils/is-today'
-import { beginDay, endDay } from './common/utils';
+import { beginDay, endDay } from './common/utils'
 export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   private idSecureDb: any
 
@@ -71,19 +71,24 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   private saveCache(event) {
-    this.persist()
-      .booking()
-      .save({
-        uuid: event.uuid,
-        start_date: event.start_date,
-        end_date: event.end_date,
-        state: event.state,
-        action: event.action,
-        person: JSON.stringify(event.person),
-        place: JSON.stringify(event.place),
-        floor: JSON.stringify(event.floor),
-        building: JSON.stringify(event.building),
-      })
+    const eventDatabase = {
+      uuid: event.uuid,
+      start_date: DateTime.fromJSDate(event.start_date)
+        .setZone('UTC+0', { keepLocalTime: true })
+        .toISO(),
+      end_date: DateTime.fromJSDate(event.end_date)
+        .setZone('UTC+0', { keepLocalTime: true })
+        .toISO(),
+      state: event.state,
+      action: event.action,
+      person: JSON.stringify(event.person),
+      place: JSON.stringify(event.place),
+      floor: JSON.stringify(event.floor),
+      building: JSON.stringify(event.building),
+      created_at: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'),
+      updated_at: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'),
+    }
+    this.persist().booking().save(eventDatabase)
 
     if (!isToday(event)) {
       return
