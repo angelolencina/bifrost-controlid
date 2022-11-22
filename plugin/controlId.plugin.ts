@@ -141,14 +141,14 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   private async sync() {
-    const now = DateTime.local().toFormat('yyyy-MM-dd HH:mm:s')
+    const now = DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss')
     const dateStart = DateTime.local().startOf('day')
     const dateEnd = DateTime.local().endOf('day')
     const bookings = await this.persist()
       .booking()
       .query()
-      .where('start_date', '>=', dateStart.toFormat('yyyy-MM-dd HH:mm:s'))
-      .where('end_date', '<=', dateEnd.toFormat('yyyy-MM-dd HH:mm:s'))
+      .where('start_date', '>=', dateStart.toFormat('yyyy-MM-dd HH:mm:ss'))
+      .where('end_date', '<=', dateEnd.toFormat('yyyy-MM-dd HH:mm:ss'))
       .whereNull('sync_date')
       .select('*')
     Logger.info(`sync ${now}: ${bookings.length} bookings`)
