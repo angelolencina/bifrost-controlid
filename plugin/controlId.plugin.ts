@@ -218,7 +218,10 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       }
       return user
     }
-    return null
+    Logger.info(`userAccessLimit : ${email} not found on controlid`)
+        // XXX TODO :: Podemo inserir usuarios caso nao existam na base?
+        //this.insertUser(booking.person)
+        return false
   }
 
   public async checkEntryRecords() {
