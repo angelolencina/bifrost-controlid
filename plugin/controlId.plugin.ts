@@ -201,6 +201,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   public async getUser(email: string) {
+    if(email && email !== ''){
     const user = await this.idSecureDb
       .query()
       .from('users')
@@ -209,15 +210,15 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       .orWhere('email', 'LIKE', email.toUpperCase())
       .orderBy('id', 'desc')
       .first()
-
-    if (!user) {
-      Logger.info(`userAccessLimit : ${email} not found`)
-      // XXX TODO :: Podemo inserir usuarios caso nao existam na base?
-      //this.insertUser(booking.person)
-      return false
+      if (!user) {
+        Logger.info(`userAccessLimit : ${email} not found`)
+        // XXX TODO :: Podemo inserir usuarios caso nao existam na base?
+        //this.insertUser(booking.person)
+        return false
+      }
+      return user
     }
-
-    return user
+    return null
   }
 
   public async checkEntryRecords() {
