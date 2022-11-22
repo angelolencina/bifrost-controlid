@@ -74,11 +74,10 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     const eventDatabase = {
       uuid: event.uuid,
       start_date: DateTime.fromJSDate(event.start_date)
-        .setZone('UTC+0', { keepLocalTime: true })
-        .toISO(),
+        .setZone('UTC+0', { keepLocalTime: true }).toFormat('yyyy-MM-dd HH:mm:ss'),
       end_date: DateTime.fromJSDate(event.end_date)
         .setZone('UTC+0', { keepLocalTime: true })
-        .toISO(),
+        .toFormat('yyyy-MM-dd HH:mm:ss'),
       state: event.state,
       action: event.action,
       person: JSON.stringify(event.person),

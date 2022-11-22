@@ -105,22 +105,22 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
         uuid: eventUuid,
         external_id: reserve.id,
         state: 'reserved',
-        sync_date: DateTime.local().toFormat('yyyy-MM-dd HH:mm:s'),
+        sync_date: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'),
         payload: JSON.stringify(response),
-        created_at: DateTime.local().toFormat('yyyy-MM-dd HH:mm:s'),
-        updated_at: DateTime.local().toFormat('yyyy-MM-dd HH:mm:s'),
+        created_at: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'),
+        updated_at: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'),
       })
   }
 
   private async sync() {
-    const now = DateTime.local().toFormat('yyyy-MM-dd HH:mm:s')
+    const now = DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss')
     const dateStart = DateTime.local().startOf('day')
     const dateEnd = DateTime.local().endOf('day')
     const bookings = await this.persist()
       .booking()
       .query()
-      .where('start_date', '>=', dateStart.toFormat('yyyy-MM-dd HH:mm:s'))
-      .where('end_date', '<=', dateEnd.toFormat('yyyy-MM-dd HH:mm:s'))
+      .where('start_date', '>=', dateStart.toFormat('yyyy-MM-dd HH:mm:ss'))
+      .where('end_date', '<=', dateEnd.toFormat('yyyy-MM-dd HH:mm:ss'))
       .whereNull('sync_date')
       .select('*')
     Logger.info(`sync ${now}: ${bookings.length} bookings`)

@@ -24,7 +24,7 @@ export default class DeskoBookingPersistence {
     await Database.from('bookings')
       .where('uuid', uuid)
       .update({
-        sync_date: DateTime.local().toFormat('yyyy-MM-dd HH:mm:s'),
+        sync_date: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'),
       })
   }
 
