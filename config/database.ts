@@ -37,7 +37,7 @@ const databaseConfig: DatabaseConfig = {
     sqlite: {
       client: 'sqlite3',
       connection: {
-        filename: './bifrost.sqlite',
+        filename: '../bifrost.sqlite',
       },
       useNullAsDefault: true,
     },
