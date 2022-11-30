@@ -58,7 +58,6 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   private declinedAccess(event) {
-    if(!Env.get('DISABLE_BOOKING_CANCELLATION_BLOCK')){
     this.persist().booking().delete(event.uuid)
     if (!isToday(event)) {
       return
@@ -69,7 +68,6 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       start_date: new Date(2021, 0, 1, 0, 0, 0),
       end_date: new Date(2021, 0, 1, 0, 0, 0),
     })
-  }
   }
 
   private saveCache(event) {
