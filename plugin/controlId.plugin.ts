@@ -25,7 +25,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       })
     }
 
-    if (Env.get('CONTROLID_FUNCTION_AUTOMATED_CHECKIN')) {
+    if (Env.get('FUNCTION_AUTOMATED_CHECKIN')) {
       this.schedule(() => this.checkEntryRecords())
     }
 
@@ -158,6 +158,9 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       return
     }
     for (const booking of bookings) {
+      if(booking?.person){
+        booking.person = JSON.parse(booking.person)
+      }
       this.persist().booking().setSync(booking.uuid)
       this.userAccessLimit({
         email: booking.person.email,
@@ -288,7 +291,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       })
       Logger.info(`syncAll Result : ${result.statusText} (${result.status})`)
     } catch (e) {
-      Logger.error(`syncAll Error  : ${JSON.stringify(e)}`)
+      Logger.info(`syncAll Error  : ${JSON.stringify(e)}`)
     }
   }
 
