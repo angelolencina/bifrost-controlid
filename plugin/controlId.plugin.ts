@@ -58,16 +58,19 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   private declinedAccess(event) {
-    this.persist().booking().delete(event.uuid)
-    if (!isToday(event)) {
-      return
+    if(!(Env.get('DISABLE_UPDATE_USER_ON_DECLINE') === 'true')){
+      this.persist().booking().delete(event.uuid)
+      if (!isToday(event)) {
+        return
+      }
+
+      this.userAccessLimit({
+        email: event.person.email,
+        start_date: new Date(2021, 0, 1, 0, 0, 0),
+        end_date: new Date(2021, 0, 1, 0, 0, 0),
+      })
     }
 
-    this.userAccessLimit({
-      email: event.person.email,
-      start_date: new Date(2021, 0, 1, 0, 0, 0),
-      end_date: new Date(2021, 0, 1, 0, 0, 0),
-    })
   }
 
   private saveCache(event) {
@@ -94,13 +97,11 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     }
 
     this.persist().booking().setSync(event.uuid)
-    if(!Env.get('DISABLE_UPDATE_CONTROLID_USER')){
     this.userAccessLimit({
       email: event.person.email,
       start_date: beginDay(event.start_date),
       end_date: endDay(event.end_date),
     })
-  }
   }
 
   public async userSaveQrCode(userId: number, number: string) {
@@ -256,7 +257,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   public async userAccessLimit({ email, start_date, end_date }) {
-    if(!Env.get('DISABLE_UPDATE_CONTROLID_USER')){
+    if(!(Env.get('DISABLE_UPDATE_CONTROLID_USER') === 'true')){
     Logger.info(`userAccessLimit : ${email} : ${start_date}:${end_date}`)
 
     const user = await this.getUser(email)
