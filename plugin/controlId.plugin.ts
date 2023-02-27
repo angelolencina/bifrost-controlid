@@ -252,8 +252,12 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     FROM Logs l
     INNER JOIN Users u ON l.idUser = u.id
     WHERE l.event = 7 AND l.time > '${lastDateRecord}'`
-    const records = await this.idSecureDb.rawQuery(query)
-    return parseEntryRecords(records)
+    return this.idSecureDb.rawQuery(query).then((response) => {
+      if(response){
+        return parseEntryRecords(response[0])
+      }
+      return []
+    })
   }
 
   public async userAccessLimit({ email, start_date, end_date }) {
