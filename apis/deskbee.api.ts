@@ -71,6 +71,7 @@ export const checkinByUser = (events: CheckInOutDto[]) => {
     .post(`/v1.1/integrations/checkin`, events)
     .then((res) => {
       if(events?.length > 0) {
+        console.log(res.data)
         console.log(`Deskbee eventos de checkin enviados com sucesso: ${events?.length || 0} eventos ${events[0]?.person || ''} `)
       }
 })
