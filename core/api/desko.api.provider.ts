@@ -105,9 +105,6 @@ export default class DeskoApiProvider {
   }
 
   public automateCheckin(events: CheckInOutDto[]) {
-    if (!events.length) {
-      return
-    }
     return this.service.sendDeviceEvent(events)
   }
 

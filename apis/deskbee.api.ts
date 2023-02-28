@@ -69,9 +69,11 @@ export const registerPersonalBadge = (personalBadgeDto: PersonalBadgeDto[]): Pro
 export const checkinByUser = (events: CheckInOutDto[]) => {
   return apiDeskbee
     .post(`/v1.1/integrations/checkin`, events)
-    .then((res) => res.data)
+    .then((res) => console.log(
+      `Eventos de checkin enviados com sucesso: ${res.data.data.length} eventos ${events[0]?.person} `
+    ))
     .catch((e) => {
-      console.log('ERROR', e)
+      console.error('Erro ao enviar checkin para deskbee', e)
       throw new Error(`Erro ao enviar eventos de checkin: ${e.message}`)
     })
 }

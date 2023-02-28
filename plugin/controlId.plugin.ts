@@ -232,6 +232,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
 
   public async checkEntryRecords() {
     const lastRecords = (await this.getUserPassLogs()) || []
+    console.log('Ultimas Entradas ControlID', lastRecords)
     Logger.info(`AutomateCheckin : ${lastRecords.length} checkinEvents`)
     this.provider()
       .automateCheckin(lastRecords)
