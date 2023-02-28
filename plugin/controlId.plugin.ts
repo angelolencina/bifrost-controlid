@@ -246,13 +246,10 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
 
   public async getUserPassLogs() {
     await this.syncAll()
-    const lastDateRecord = await this.persist()
-      .entryRecord()
-      .getDatetimeLastRecord(TypeEventControlid.Pass)
     const query = `SELECT u.id, u.email, u.name, l.idDevice, l.deviceName, l.reader, l.idArea, l.area, l.event, l.time
     FROM Logs l
     INNER JOIN Users u ON l.idUser = u.id
-    WHERE l.event = 7 AND l.time > '${lastDateRecord}'`
+    WHERE l.event = 7 AND l.time > date_sub(NOW(), INTERVAL 5 minute)`
     return this.idSecureDb.rawQuery(query).then((response) => {
       if(response){
         return parseEntryRecords(response[0])
