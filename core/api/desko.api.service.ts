@@ -14,7 +14,7 @@ export default class DeskoApiService {
             return booking
           }
           console.warn(`Email ${booking?.person?.email?.toLowerCase()} NÃO ESTÁ dentro da homologação - Controle de acesso DESATIVADO`)
-          return null
+          return false
 
      }
     return booking
