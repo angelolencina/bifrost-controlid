@@ -294,7 +294,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       })
       Logger.info(`syncAll Result : ${result.statusText} (${result.status})`)
     } catch (e) {
-      Logger.info(`syncAll Error  : ${JSON.stringify(e)}`)
+      console.error(`syncAll Error  :`, e)
     }
   }
 
