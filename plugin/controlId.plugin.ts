@@ -58,7 +58,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   private declinedAccess(event) {
-    if(!(Env.get('DISABLE_UPDATE_USER_ON_DECLINE') === 'true')){
+    if (!(Env.get('DISABLE_UPDATE_USER_ON_DECLINE') === 'true')) {
       this.persist().booking().delete(event.uuid)
       if (!isToday(event)) {
         return
@@ -70,14 +70,14 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
         end_date: new Date(2021, 0, 1, 0, 0, 0),
       })
     }
-
   }
 
   private saveCache(event) {
     const eventDatabase = {
       uuid: event.uuid,
       start_date: DateTime.fromJSDate(event.start_date)
-        .setZone('UTC+0', { keepLocalTime: true }).toFormat('yyyy-MM-dd HH:mm:ss'),
+        .setZone('UTC+0', { keepLocalTime: true })
+        .toFormat('yyyy-MM-dd HH:mm:ss'),
       end_date: DateTime.fromJSDate(event.end_date)
         .setZone('UTC+0', { keepLocalTime: true })
         .toFormat('yyyy-MM-dd HH:mm:ss'),
@@ -159,7 +159,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       return
     }
     for (const booking of bookings) {
-      if(booking?.person){
+      if (booking?.person) {
         booking.person = JSON.parse(booking.person)
       }
       this.persist().booking().setSync(booking.uuid)
@@ -207,15 +207,15 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   public async getUser(email: string) {
-    if(email && email !== ''){
-    const user = await this.idSecureDb
-      .query()
-      .from('users')
-      .where('deleted', 0)
-      .andWhere('email', 'LIKE', email)
-      .orWhere('email', 'LIKE', email.toUpperCase())
-      .orderBy('id', 'desc')
-      .first()
+    if (email && email !== '') {
+      const user = await this.idSecureDb
+        .query()
+        .from('users')
+        .where('deleted', 0)
+        .andWhere('email', 'LIKE', email)
+        .orWhere('email', 'LIKE', email.toUpperCase())
+        .orderBy('id', 'desc')
+        .first()
       if (!user) {
         Logger.info(`userAccessLimit : ${email} not found`)
         // XXX TODO :: Podemo inserir usuarios caso nao existam na base?
@@ -225,9 +225,9 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       return user
     }
     Logger.info(`userAccessLimit : ${email} not found on controlid`)
-        // XXX TODO :: Podemo inserir usuarios caso nao existam na base?
-        //this.insertUser(booking.person)
-        return false
+    // XXX TODO :: Podemo inserir usuarios caso nao existam na base?
+    //this.insertUser(booking.person)
+    return false
   }
 
   public async checkEntryRecords() {
@@ -246,12 +246,17 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
 
   public async getUserPassLogs() {
     await this.syncAll()
-    const query = `SELECT u.id, u.email, u.name, l.idDevice, l.deviceName, l.reader, l.idArea, l.area, l.event, l.time
+    const mysqlQuery = `SELECT u.id, u.email, u.name, l.idDevice, l.deviceName, l.reader, l.idArea, l.area, l.event, l.time
     FROM Logs l
     INNER JOIN Users u ON l.idUser = u.id
     WHERE l.event = 7 AND l.time > date_sub(NOW(), INTERVAL 5 minute)`
+    const sqlite = `SELECT u.id, u.email, u.name, l.idDevice, l.deviceName, l.reader, l.idArea, l.area, l.event, l.time
+    FROM Logs l
+    INNER JOIN Users u ON l.idUser = u.id
+    WHERE l.event = 7 AND l.time > date_sub(NOW(), INTERVAL 5 minute)`
+    const query = Env.get('DATABASE_drive') === 'mysql' ? mysqlQuery : sqlite
     return this.idSecureDb.rawQuery(query).then((response) => {
-      if(response){
+      if (response) {
         return parseEntryRecords(response[0])
       }
       return []
@@ -259,25 +264,25 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   public async userAccessLimit({ email, start_date, end_date }) {
-    if(!(Env.get('DISABLE_UPDATE_CONTROLID_USER') === 'true')){
-    Logger.info(`userAccessLimit : ${email} : ${start_date}:${end_date}`)
+    if (!(Env.get('DISABLE_UPDATE_CONTROLID_USER') === 'true')) {
+      Logger.info(`userAccessLimit : ${email} : ${start_date}:${end_date}`)
 
-    const user = await this.getUser(email)
-    if (!user) {
-      return
-    }
+      const user = await this.getUser(email)
+      if (!user) {
+        return
+      }
 
-    await this.idSecureDb
-      .query()
-      .from('users')
-      .where('id', user.id)
-      .update({
-        dateStartLimit: DateTime.fromJSDate(start_date)
-          .startOf('day')
-          .toFormat('yyyy-MM-dd HH:mm:ss'),
-        dateLimit: DateTime.fromJSDate(end_date).endOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
-      })
-    this.syncAll()
+      await this.idSecureDb
+        .query()
+        .from('users')
+        .where('id', user.id)
+        .update({
+          dateStartLimit: DateTime.fromJSDate(start_date)
+            .startOf('day')
+            .toFormat('yyyy-MM-dd HH:mm:ss'),
+          dateLimit: DateTime.fromJSDate(end_date).endOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
+        })
+      this.syncAll()
     }
   }
 
