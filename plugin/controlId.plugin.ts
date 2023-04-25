@@ -254,7 +254,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     FROM Logs l
     INNER JOIN Users u ON l.idUser = u.id
     WHERE l.event = 7 AND l.time > DATETIME(DATETIME('now'), '-5 minutes' )`
-    const query = Env.get('DATABASE_drive') === 'mysql' ? mysqlQuery : sqlite
+    const query = Env.get('CONTROLID_DB_CONNECTION') === 'mysql' ? mysqlQuery : sqlite
     return this.idSecureDb.rawQuery(query).then((response) => {
       if (response) {
         return parseEntryRecords(response)
