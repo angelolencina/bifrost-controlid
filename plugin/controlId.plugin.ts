@@ -257,7 +257,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     const query = Env.get('DATABASE_drive') === 'mysql' ? mysqlQuery : sqlite
     return this.idSecureDb.rawQuery(query).then((response) => {
       if (response) {
-        return parseEntryRecords(response[0])
+        return parseEntryRecords(response)
       }
       return []
     })
