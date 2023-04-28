@@ -39,14 +39,14 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     this.webhook('booking', async (deskoEvent) => {
       this.eventAccessControl(deskoEvent)
     })
-    if (Env.get('FUNCTION_ACCESS_CONTROL')) {
+    if (this.ACCESS_CONTROL) {
       this.schedule(() => this.sync())
       this.webhook('booking', async (deskoEvent) => {
         this.eventAccessControl(deskoEvent)
       })
     }
 
-    if (Env.get('CUSTOM_ACCESS_CONTROL')) {
+    if (this.CUSTOM_ACCESS_CONTROL) {
       this.schedule(() => this.sync())
       this.webhook('booking', async (deskoEvent) => {
         this.eventAccessControl(deskoEvent)
