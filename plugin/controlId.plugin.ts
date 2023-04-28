@@ -138,9 +138,9 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
         end_date: endDay(end_date),
       })
     }
-
+    console.log('blockUserAccessOnControlId', this.CUSTOM_ACCESS_CONTROL)
     if (this.CUSTOM_ACCESS_CONTROL) {
-      this.addUserToGroup(email)
+      this.addUserToGroup(email, event.place.type)
     }
   }
 
@@ -324,8 +324,10 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     })
   }
 
-  public async addUserToGroup(email: string) {
-    const idGroup: number = Env.get('CONTROLID_GROUP_ID')
+  public async addUserToGroup(email: string, placeType: string) {
+    console.log('addUserToGroup', email, placeType)
+    const idGroup: number = await this.getGroupId(placeType).then((res) => res?.id)
+    console.log('idGroup', idGroup)
     const user = await this.getUser(email)
     if (!user || !idGroup) {
       return
