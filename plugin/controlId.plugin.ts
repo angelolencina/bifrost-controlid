@@ -19,11 +19,11 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   public ACCESS_PLACE_TYPE: string[] = Env.get('ACCESS_PLACE_TYPE')?.split(',')
 
   public placeNames: any = {
-    dininghall: 'Refeitório',
+    dininghall: 'Refeitorio',
     meetingroom: 'Sala de reunião',
     parking: 'Estacionamento',
     coworking: 'Coworking',
-    bus: 'ônibus',
+    bus: 'onibus',
     locker: 'locker',
     service: 'serviço',
     bathroom: 'banheiro',
