@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { DateTime } from 'luxon'
 import DeskoCore from '../core/desko.core'
 import Env from '@ioc:Adonis/Core/Env'
@@ -13,12 +14,39 @@ import { isToday } from '../core/utils/is-today'
 import { beginDay, endDay } from './common/utils'
 export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   private idSecureDb: any
+  public ACCESS_CONTROL: boolean = Env.get('FUNCTION_ACCESS_CONTROL') === 'true'
+  public CUSTOM_ACCESS_CONTROL: boolean = Env.get('FUNCTION_CUSTOM_ACCESS_CONTROL') === 'true'
+  public ACCESS_PLACE_TYPE: string[] = Env.get('ACCESS_PLACE_TYPE')?.split(',')
+
+  public placeNames: any = {
+    dininghall: 'Refeitório',
+    meetingroom: 'Sala de reunião',
+    parking: 'Estacionamento',
+    coworking: 'Coworking',
+    bus: 'ônibus',
+    locker: 'locker',
+    service: 'serviço',
+    bathroom: 'banheiro',
+    kitchen: 'cozinha',
+    reception: 'recepção',
+    homeoffice: 'home office',
+  }
 
   public init() {
     if (!this.connIdSecureDb()) {
       return
     }
+    this.webhook('booking', async (deskoEvent) => {
+      this.eventAccessControl(deskoEvent)
+    })
     if (Env.get('FUNCTION_ACCESS_CONTROL')) {
+      this.schedule(() => this.sync())
+      this.webhook('booking', async (deskoEvent) => {
+        this.eventAccessControl(deskoEvent)
+      })
+    }
+
+    if (Env.get('CUSTOM_ACCESS_CONTROL')) {
       this.schedule(() => this.sync())
       this.webhook('booking', async (deskoEvent) => {
         this.eventAccessControl(deskoEvent)
@@ -97,11 +125,41 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     }
 
     this.persist().booking().setSync(event.uuid)
-    this.userAccessLimit({
-      email: event.person.email,
-      start_date: beginDay(event.start_date),
-      end_date: endDay(event.end_date),
-    })
+
+    this.blockUserAccessOnControlId(event)
+  }
+
+  public async blockUserAccessOnControlId(event) {
+    const { email, start_date, end_date } = event
+    if (this.ACCESS_CONTROL) {
+      this.userAccessLimit({
+        email: email,
+        start_date: beginDay(start_date),
+        end_date: endDay(end_date),
+      })
+    }
+
+    if (this.CUSTOM_ACCESS_CONTROL) {
+      this.addUserToGroup(email)
+    }
+  }
+
+  public async getGroupId(placeType: string) {
+    if (this.ACCESS_PLACE_TYPE?.length && this.ACCESS_PLACE_TYPE.includes(placeType)) {
+      const response = await this.idSecureDb
+        .select('id')
+        .from('groups')
+        .where('name', this.placeNames[placeType])
+        .first()
+      if (!response) {
+        console.warn(`getGroupId: group not found ${placeType}`)
+        return
+      }
+      return response.id
+    } else {
+      console.warn(`getGroupId: placeType not active to custom access control ${placeType}`)
+    }
+    return null
   }
 
   public async userSaveQrCode(userId: number, number: string) {
@@ -264,6 +322,34 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       }
       return []
     })
+  }
+
+  public async addUserToGroup(email: string) {
+    const idGroup: number = Env.get('CONTROLID_GROUP_ID')
+    const user = await this.getUser(email)
+    if (!user || !idGroup) {
+      return
+    }
+    const idUser = user.id
+    return this.idSecureDb.query().from('usergroups').insert({
+      idUser,
+      idGroup,
+    })
+  }
+
+  public async removeUserFromGroup(email: string) {
+    const idGroup: number = Env.get('CONTROLID_GROUP_ID')
+    const user = await this.getUser(email)
+    if (!user || !idGroup) {
+      return
+    }
+    const idUser = user.id
+    return this.idSecureDb
+      .query()
+      .from('usergroups')
+      .where('idUser', idUser)
+      .andWhere('idGroup', idGroup)
+      .delete()
   }
 
   public async userAccessLimit({ email, start_date, end_date }) {
