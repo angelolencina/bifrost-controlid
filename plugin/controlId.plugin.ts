@@ -355,7 +355,8 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   public async removeUserFromGroup(email: string) {
-    const idGroup: number = Env.get('CONTROLID_GROUP_ID')
+    const idGroup: number = await this.getGroupId(Env.get('ACCESS_PLACE_TYPE'))
+    console.log('removeUserFromGroup', email, idGroup)
     const user = await this.getUser(email)
     if (!user || !idGroup) {
       return
