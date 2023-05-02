@@ -138,7 +138,11 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   public async allowAccessOnControlId(event) {
-    const { email, start_date, end_date } = event
+    const {
+      person: { email },
+      start_date,
+      end_date,
+    } = event
     if (this.ACCESS_CONTROL) {
       this.userAccessLimit({
         email: email,
