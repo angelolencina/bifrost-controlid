@@ -36,9 +36,6 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     if (!this.connIdSecureDb()) {
       return
     }
-    this.webhook('booking', async (deskoEvent) => {
-      this.eventAccessControl(deskoEvent)
-    })
     if (this.ACCESS_CONTROL) {
       this.schedule(() => this.sync())
       this.webhook('booking', async (deskoEvent) => {
@@ -156,8 +153,11 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   public async getGroupId(placeType: string) {
+    console.log('getGroupId', this.ACCESS_PLACE_TYPE, placeType)
     if (this.ACCESS_PLACE_TYPE?.length && this.ACCESS_PLACE_TYPE.includes(placeType)) {
+      console.log(this.placeNames[placeType])
       const response = await this.idSecureDb
+        .query()
         .select('id')
         .from('groups')
         .where('name', this.placeNames[placeType])
@@ -337,17 +337,17 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
 
   public async addUserToGroup(email: string, placeType: string) {
     console.log('addUserToGroup', email, placeType)
-    const idGroup: number = await this.getGroupId(placeType).then((res) => res?.id)
+    const idGroup: number = await this.getGroupId(placeType)
     console.log('idGroup', idGroup)
     const user = await this.getUser(email)
     if (!user || !idGroup) {
       return
     }
     const idUser = user.id
-    return this.idSecureDb.query().from('usergroups').insert({
-      idUser,
-      idGroup,
-    })
+    const idType = user.idType
+
+    const query = `INSERT INTO usergroups (idUser, idGroup, isVisitor) VALUES (${idUser}, ${idGroup}, ${idType})`
+    return this.idSecureDb.rawQuery(query)
   }
 
   public async removeUserFromGroup(email: string) {
