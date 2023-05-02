@@ -98,6 +98,17 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
         end_date: new Date(2021, 0, 1, 0, 0, 0),
       })
     }
+    if (this.ACCESS_CONTROL) {
+      this.userAccessLimit({
+        email: event.person.email,
+        start_date: new Date(2021, 0, 1, 0, 0, 0),
+        end_date: new Date(2021, 0, 1, 0, 0, 0),
+      })
+    }
+    console.log('declinedAccess Group', this.CUSTOM_ACCESS_CONTROL)
+    if (this.CUSTOM_ACCESS_CONTROL) {
+      this.removeUserFromGroup(event.person.email)
+    }
   }
 
   private saveCache(event) {
@@ -126,10 +137,10 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
 
     this.persist().booking().setSync(event.uuid)
 
-    this.blockUserAccessOnControlId(event)
+    this.allowAccessOnControlId(event)
   }
 
-  public async blockUserAccessOnControlId(event) {
+  public async allowAccessOnControlId(event) {
     const { email, start_date, end_date } = event
     if (this.ACCESS_CONTROL) {
       this.userAccessLimit({
@@ -138,7 +149,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
         end_date: endDay(end_date),
       })
     }
-    console.log('blockUserAccessOnControlId', this.CUSTOM_ACCESS_CONTROL)
+    console.log('allowAccessOnControlId', this.CUSTOM_ACCESS_CONTROL)
     if (this.CUSTOM_ACCESS_CONTROL) {
       this.addUserToGroup(email, event.place.type)
     }
