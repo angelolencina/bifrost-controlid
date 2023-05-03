@@ -371,25 +371,27 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   }
 
   public async userAccessLimit({ email, start_date, end_date }) {
-    if (!(Env.get('DISABLE_UPDATE_CONTROLID_USER') === 'true')) {
-      Logger.info(`userAccessLimit : ${email} : ${start_date}:${end_date}`)
+    if (this.ACCESS_CONTROL) {
+      if (!(Env.get('DISABLE_UPDATE_CONTROLID_USER') === 'true')) {
+        Logger.info(`userAccessLimit : ${email} : ${start_date}:${end_date}`)
 
-      const user = await this.getUser(email)
-      if (!user) {
-        return
+        const user = await this.getUser(email)
+        if (!user) {
+          return
+        }
+
+        await this.idSecureDb
+          .query()
+          .from('users')
+          .where('id', user.id)
+          .update({
+            dateStartLimit: DateTime.fromJSDate(start_date)
+              .startOf('day')
+              .toFormat('yyyy-MM-dd HH:mm:ss'),
+            dateLimit: DateTime.fromJSDate(end_date).endOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
+          })
+        this.syncAll()
       }
-
-      await this.idSecureDb
-        .query()
-        .from('users')
-        .where('id', user.id)
-        .update({
-          dateStartLimit: DateTime.fromJSDate(start_date)
-            .startOf('day')
-            .toFormat('yyyy-MM-dd HH:mm:ss'),
-          dateLimit: DateTime.fromJSDate(end_date).endOf('day').toFormat('yyyy-MM-dd HH:mm:ss'),
-        })
-      this.syncAll()
     }
   }
 
