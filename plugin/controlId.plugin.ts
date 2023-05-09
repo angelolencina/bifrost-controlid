@@ -37,6 +37,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       return
     }
     if (this.ACCESS_CONTROL) {
+      console.log("this.ACCESS_CONTROL", this.ACCESS_CONTROL)
       this.schedule(() => this.sync())
       this.webhook('booking', async (deskoEvent) => {
         this.eventAccessControl(deskoEvent)
@@ -44,6 +45,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     }
 
     if (this.CUSTOM_ACCESS_CONTROL) {
+      console.log("this.CUSTOM_ACCESS_CONTROL", this.CUSTOM_ACCESS_CONTROL)
       this.schedule(() => this.sync())
       this.webhook('booking', async (deskoEvent) => {
         this.eventAccessControl(deskoEvent)
@@ -372,6 +374,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
 
   public async userAccessLimit({ email, start_date, end_date }) {
     if (this.ACCESS_CONTROL) {
+      console.log('userAccessLimit', email, start_date, end_date)
       if (!(Env.get('DISABLE_UPDATE_CONTROLID_USER') === 'true')) {
         Logger.info(`userAccessLimit : ${email} : ${start_date}:${end_date}`)
 
