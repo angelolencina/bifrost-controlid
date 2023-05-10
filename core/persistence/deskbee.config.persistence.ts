@@ -13,10 +13,6 @@ type TCredential = {
 export default class DeskbeeConfigPersistence {
   public ACCOUNT = Env.get('ACCOUNT')
   public async save(token: string): Promise<void> {
-    const exists = await Database.from('configurations')
-      .where('account', this.ACCOUNT)
-      .select('id')
-      .first()
     const credentials: TCredential = {
       grant_type: 'client_credentials',
       client_id: Env.get('DESKBEE_API_CLIENT_ID'),
@@ -24,20 +20,11 @@ export default class DeskbeeConfigPersistence {
       scope: Env.get('DESKBEE_API_SCOPE'),
     }
     const token_expires_in = DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:s')
-    if (exists) {
-      return Database.transaction(async (trx) => {
-        await trx
-          .from('configurations')
-          .where('account', this.ACCOUNT)
-          .update({ token, credentials, token_expires_in })
-      })
-    }
-
     return Database.transaction(async (trx) => {
       await trx
-        .insertQuery()
-        .table('configurations')
-        .insert({ account: this.ACCOUNT, token, credentials, token_expires_in })
+        .from('configurations')
+        .where('account', this.ACCOUNT)
+        .update({ token, credentials, token_expires_in })
     })
   }
 
@@ -58,7 +45,7 @@ export default class DeskbeeConfigPersistence {
       .where('account', this.ACCOUNT)
       .select('id')
       .first()
-    if (!exists) {
+    if (exists) {
       return Database.transaction(async (trx) => {
         await trx
           .from('configurations')
