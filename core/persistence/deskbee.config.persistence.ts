@@ -23,9 +23,9 @@ export default class DeskbeeConfigPersistence {
     console.log('SAVING TOKEN ', { token, credential, token_expires_in })
     return Database.transaction(async (trx) => {
       await trx
-        .from('configurations')
-        .where('account', this.ACCOUNT)
-        .update({ token, credential, token_expires_in })
+        .insertQuery()
+        .table('configurations')
+        .insert({ account: this.ACCOUNT, token, credential, token_expires_in })
     })
   }
 
