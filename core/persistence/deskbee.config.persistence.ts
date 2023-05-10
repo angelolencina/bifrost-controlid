@@ -20,7 +20,11 @@ export default class DeskbeeConfigPersistence {
       scope: Env.get('DESKBEE_API_SCOPE'),
     }
     const token_expires_in = DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:ss')
-    console.log('SAVING TOKEN ', { token, credential, token_expires_in })
+    console.log('SAVING TOKEN ', {
+      token,
+      credential: JSON.stringify(credential),
+      token_expires_in,
+    })
     return Database.transaction(async (trx) => {
       await trx
         .insertQuery()
