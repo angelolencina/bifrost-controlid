@@ -12,20 +12,32 @@ type TCredential = {
 
 export default class DeskbeeConfigPersistence {
   public ACCOUNT = Env.get('ACCOUNT')
-  public async save(credentials: TCredential) {
+  public async save(token: string): Promise<void> {
     const exists = await Database.from('configurations')
       .where('account', this.ACCOUNT)
       .select('id')
       .first()
-
+    const credentials: TCredential = {
+      grant_type: 'client_credentials',
+      client_id: Env.get('DESKBEE_API_CLIENT_ID'),
+      client_secret: Env.get('DESKBEE_API_CLIENT_SECRET'),
+      scope: Env.get('DESKBEE_API_SCOPE'),
+    }
+    const token_expires_in = DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:s')
     if (exists) {
       return Database.transaction(async (trx) => {
-        await trx.from('configurations').where('account', this.ACCOUNT).update(credentials)
+        await trx
+          .from('configurations')
+          .where('account', this.ACCOUNT)
+          .update({ token, credentials, token_expires_in })
       })
     }
 
     return Database.transaction(async (trx) => {
-      await trx.insertQuery().table('configurations').insert(credentials)
+      await trx
+        .insertQuery()
+        .table('configurations')
+        .insert({ account: this.ACCOUNT, token, credentials, token_expires_in })
     })
   }
 
@@ -42,15 +54,22 @@ export default class DeskbeeConfigPersistence {
 
   public async setToken(token: string | null): Promise<void> {
     if (!token) return
-    return Database.transaction(async (trx) => {
-      await trx
-        .from('configurations')
-        .where('account', this.ACCOUNT)
-        .update({
-          token,
-          token_expires_in: DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:s'),
-        })
-    })
+    const exists = await Database.from('configurations')
+      .where('account', this.ACCOUNT)
+      .select('id')
+      .first()
+    if (!exists) {
+      return Database.transaction(async (trx) => {
+        await trx
+          .from('configurations')
+          .where('account', this.ACCOUNT)
+          .update({
+            token,
+            token_expires_in: DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:s'),
+          })
+      })
+    }
+    return this.save(token)
   }
 
   public async getToken(): Promise<string | null> {
