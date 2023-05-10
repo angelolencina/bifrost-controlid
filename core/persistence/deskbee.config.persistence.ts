@@ -13,18 +13,18 @@ type TCredential = {
 export default class DeskbeeConfigPersistence {
   public ACCOUNT = Env.get('ACCOUNT')
   public async save(token: string): Promise<void> {
-    const credentials: TCredential = {
+    const credential: TCredential = {
       grant_type: 'client_credentials',
       client_id: Env.get('DESKBEE_API_CLIENT_ID'),
       client_secret: Env.get('DESKBEE_API_CLIENT_SECRET'),
       scope: Env.get('DESKBEE_API_SCOPE'),
     }
-    const token_expires_in = DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:s')
+    const token_expires_in = DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:ss')
     return Database.transaction(async (trx) => {
       await trx
         .from('configurations')
         .where('account', this.ACCOUNT)
-        .update({ token, credentials, token_expires_in })
+        .update({ token, credential, token_expires_in })
     })
   }
 
@@ -52,7 +52,7 @@ export default class DeskbeeConfigPersistence {
           .where('account', this.ACCOUNT)
           .update({
             token,
-            token_expires_in: DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:s'),
+            token_expires_in: DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:ss'),
           })
       })
     }
@@ -63,7 +63,7 @@ export default class DeskbeeConfigPersistence {
     const dataToken = await Database.from('configurations')
       .where('account', this.ACCOUNT)
       .select('token', 'token_expires_in')
-      .where('token_expires_in', '>', DateTime.local().toFormat('yyyy-MM-dd HH:mm:s'))
+      .where('token_expires_in', '>', DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'))
       .first()
     return dataToken?.token || null
   }

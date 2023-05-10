@@ -10,7 +10,7 @@
     "format": "prettier --write .",
     "exposer": "ngrok http 3000 --subdomain=lencina",
     "generate:executable": "npx link node-windows &&  npx pkg build/desko-secureId-windows-service.js",
-    "update": "git pull && npm run build && pm2 restart all"
+    "update": "pm2 stop all && git pull && npm run build && pm2 restart all"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^5.3.7",
