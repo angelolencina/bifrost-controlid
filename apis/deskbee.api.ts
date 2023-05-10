@@ -38,9 +38,9 @@ const getBearerToken = () => {
       `${baseURL}/v1.1/oauth/token`,
       {
         grant_type: 'client_credentials',
-        client_id: Env.get('DESKO_API_CLIENT_ID'),
-        client_secret: Env.get('DESKO_API_CLIENT_SECRET'),
-        scope: Env.get('DESKO_API_SCOPE'),
+        client_id: Env.get('DESKBEE_API_CLIENT_ID'),
+        client_secret: Env.get('DESKBEE_API_CLIENT_SECRET'),
+        scope: Env.get('DESKBEE_API_SCOPE'),
       },
       {
         headers: { 'Content-Type': `application/json; charset=UTF-8` },
