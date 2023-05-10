@@ -45,7 +45,7 @@ export default class DeskbeeConfigPersistence {
       .where('account', this.ACCOUNT)
       .select('id')
       .first()
-    if (exists) {
+    if (exists?.id) {
       return Database.transaction(async (trx) => {
         await trx
           .from('configurations')
