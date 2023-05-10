@@ -5,7 +5,7 @@ import { CheckInOutDto } from '../core/dto/desko.check-in-out.dto'
 import * as https from 'https'
 import DeskbeeConfigPersistence from '../core/persistence/deskbee.config.persistence'
 
-const baseURL = Env.get('DESKO_API_URL')
+const baseURL = Env.get('DESKBEE_API_URL')
 export const apiDeskbee = axios.create({
   baseURL,
   headers: { 'Content-Type': `application/json; charset=UTF-8` },
