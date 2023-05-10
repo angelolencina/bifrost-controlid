@@ -20,6 +20,7 @@ export default class DeskbeeConfigPersistence {
       scope: Env.get('DESKBEE_API_SCOPE'),
     }
     const token_expires_in = DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:ss')
+    console.log('SAVING TOKEN ', { token, credential, token_expires_in })
     return Database.transaction(async (trx) => {
       await trx
         .from('configurations')
@@ -45,7 +46,13 @@ export default class DeskbeeConfigPersistence {
       .where('account', this.ACCOUNT)
       .select('id')
       .first()
-    if (exists?.id) {
+    console.log('EXISTS', exists)
+
+    if (exists) {
+      console.log('UPDATE TOKEN', {
+        token,
+        token_expires_in: DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:ss'),
+      })
       return Database.transaction(async (trx) => {
         await trx
           .from('configurations')
