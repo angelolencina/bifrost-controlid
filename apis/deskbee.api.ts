@@ -3,14 +3,18 @@ import Env from '@ioc:Adonis/Core/Env'
 import { PersonalBadgeDto } from '../core/dto/desko.personal-badge.dto'
 import { CheckInOutDto } from '../core/dto/desko.check-in-out.dto'
 import * as https from 'https'
+const path = require('path')
 import DeskbeeConfigPersistence from '../core/persistence/deskbee.config.persistence'
+const rootCas = require('ssl-root-cas').create()
 
 const baseURL = Env.get('DESKBEE_API_URL')
+rootCas.addFile(path.resolve(__dirname, 'intermediate.pem'))
 export const apiDeskbee = axios.create({
   baseURL,
   headers: { 'Content-Type': `application/json; charset=UTF-8` },
   httpsAgent: new https.Agent({
     rejectUnauthorized: false,
+    ca: rootCas,
   }),
 })
 
