@@ -40,6 +40,11 @@ export default class DeskoCore {
     return require('node-schedule').scheduleJob(`*/${minutes} * * * *`, async () => callback())
   }
 
+  protected scheduleEndDay(callback) {
+    callback()
+    return require('node-schedule').scheduleJob(`0 23 * * *`, async () => callback())
+  }
+
   protected database(
     storeConnection: string,
     connection: SqliteConfig | MysqlConfig | PostgreConfig | OracleConfig | MssqlConfig

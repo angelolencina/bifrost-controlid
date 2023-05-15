@@ -37,7 +37,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       return
     }
     if (this.ACCESS_CONTROL) {
-      console.log("this.ACCESS_CONTROL", this.ACCESS_CONTROL)
+      console.log('this.ACCESS_CONTROL', this.ACCESS_CONTROL)
       this.schedule(() => this.sync())
       this.webhook('booking', async (deskoEvent) => {
         this.eventAccessControl(deskoEvent)
@@ -45,7 +45,8 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     }
 
     if (this.CUSTOM_ACCESS_CONTROL) {
-      console.log("this.CUSTOM_ACCESS_CONTROL", this.CUSTOM_ACCESS_CONTROL)
+      this.scheduleEndDay(() => this.deleteAllUserFromGroup())
+      console.log('this.CUSTOM_ACCESS_CONTROL', this.CUSTOM_ACCESS_CONTROL)
       this.schedule(() => this.sync())
       this.webhook('booking', async (deskoEvent) => {
         this.eventAccessControl(deskoEvent)
@@ -77,7 +78,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       Logger.error('Event NotFound')
       return
     }
-    if (event.action === 'deleted' || event.state === 'fall') {
+    if (event.action === 'deleted' || event.state === 'fall' || event.action === 'checkout') {
       this.declinedAccess(event)
       return
     }
@@ -370,6 +371,11 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       .where('idUser', idUser)
       .andWhere('idGroup', idGroup)
       .delete()
+  }
+
+  public async deleteAllUserFromGroup() {
+    const idGroup: number = await this.getGroupId(Env.get('ACCESS_PLACE_TYPE'))
+    return this.idSecureDb.query().from('usergroups').where('idGroup', idGroup).delete()
   }
 
   public async userAccessLimit({ email, start_date, end_date }) {
