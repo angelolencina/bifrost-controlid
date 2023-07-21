@@ -78,7 +78,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
       Logger.error('Event NotFound')
       return
     }
-    if (event.action === 'deleted' || event.state === 'fall' || event.action === 'checkout') {
+    if (event.action === 'deleted' || event.action === 'checkout') {
       this.declinedAccess(event)
       return
     }
