@@ -64,7 +64,7 @@ export default class DeskbeeConfigPersistence {
           .update({
             token,
             token_expires_in: DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:ss'),
-            updated: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'),
+            updated_at: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'),
           })
       })
     }
