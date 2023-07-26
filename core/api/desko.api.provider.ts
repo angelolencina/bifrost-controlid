@@ -43,29 +43,23 @@ export default class DeskoApiProvider {
     this.event = payload.event
 
     Logger.info(`event: ${JSON.stringify(payload)}`)
-    return await this.setEventContent()
+    return this.setEventContent()
   }
 
   public async setEventContent() {
-    switch (this.event) {
-      case 'booking':
-        const payload = await this.service.getBooking(this.resource.uuid)
-        if (!payload) {
-          return
-        }
-
-        this.payload = payload
+    if (this.event === 'booking') {
+      try {
+        this.payload = await this.service.getBooking(this.resource.uuid)
         return this.getEventBooking()
-
-      case 'checkin':
-        return {
-          action: this.getAction(),
-          uuid: this.resource.uuid,
-        }
-
-      default:
-        // XXX TODO :: tratar erro
-        break
+      } catch (error) {
+        return 'error'
+      }
+    }
+    if (this.event === 'checkin') {
+      return {
+        action: this.getAction(),
+        uuid: this.resource.uuid,
+      }
     }
   }
 

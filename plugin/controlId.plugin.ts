@@ -74,6 +74,11 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
   private async eventAccessControl(deskoEvent: DeskoEventDto) {
     Logger.info(`event: eventAccessControl ${JSON.stringify(deskoEvent)}`)
     const event = await this.provider().runEvent(deskoEvent)
+    if (event === 'error') {
+      if (deskoEvent.included?.person?.email) {
+        this.allowAccess(deskoEvent.included?.person?.email)
+      }
+    }
     if (!event) {
       Logger.error('Event NotFound')
       return
@@ -108,6 +113,16 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     console.log('declinedAccess Group', this.CUSTOM_ACCESS_CONTROL)
     if (this.CUSTOM_ACCESS_CONTROL) {
       this.removeUserFromGroup(event.person.email)
+    }
+  }
+
+  private allowAccess(email: string) {
+    if (this.ACCESS_CONTROL) {
+      this.userAccessLimit({
+        email,
+        start_date: null,
+        end_date: null,
+      })
     }
   }
 
