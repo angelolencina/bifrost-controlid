@@ -64,6 +64,7 @@ export default class DeskbeeConfigPersistence {
           .update({
             token,
             token_expires_in: DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:ss'),
+            updated: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'),
           })
       })
     }
@@ -74,7 +75,7 @@ export default class DeskbeeConfigPersistence {
     const dataToken = await Database.from('configurations')
       .where('account', this.ACCOUNT)
       .select('token', 'token_expires_in')
-      .where('token_expires_in', '>', DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'))
+      .where('token_expires_in', '>=', DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'))
       .first()
     return dataToken?.token || null
   }
