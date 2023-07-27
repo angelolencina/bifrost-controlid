@@ -76,7 +76,8 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     const event = await this.provider().runEvent(deskoEvent)
     if (event === 'error') {
       if (deskoEvent.included?.person?.email) {
-        this.allowAccess(deskoEvent.included?.person?.email)
+        const included = deskoEvent.included
+        this.allowAccess(included?.person?.email, included?.start_date, included?.end_date)
       }
     }
     if (!event) {
@@ -116,12 +117,12 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     }
   }
 
-  private allowAccess(email: string) {
+  private allowAccess(email: string, start_date: string, end_date: string) {
     if (this.ACCESS_CONTROL) {
       this.userAccessLimit({
-        email,
-        start_date: null,
-        end_date: null,
+        email: email,
+        start_date: beginDay(start_date),
+        end_date: endDay(end_date),
       })
     }
   }
