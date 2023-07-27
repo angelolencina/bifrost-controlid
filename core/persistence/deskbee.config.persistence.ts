@@ -44,8 +44,7 @@ export default class DeskbeeConfigPersistence {
     })
   }
 
-  public async setToken(token: string | null): Promise<void> {
-    if (!token) return
+  public async setToken(newToken: string | null): Promise<void> {
     const exists = await Database.from('configurations')
       .where('account', this.ACCOUNT)
       .select('id')
@@ -54,16 +53,16 @@ export default class DeskbeeConfigPersistence {
 
     if (exists) {
       console.log('UPDATE TOKEN', {
-        token,
-        token_expires_in: DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:ss'),
+        token: newToken,
+        token_expires_in: DateTime.local().plus({ hours: 10 }).toFormat('yyyy-MM-dd HH:mm:ss'),
       })
       return Database.transaction(async (trx) => {
         await trx
           .from('configurations')
           .where('account', this.ACCOUNT)
           .update({
-            token,
-            token_expires_in: DateTime.local().plus({ hours: 18 }).toFormat('yyyy-MM-dd HH:mm:ss'),
+            token: newToken,
+            token_expires_in: DateTime.local().plus({ hours: 10 }).toFormat('yyyy-MM-dd HH:mm:ss'),
             updated_at: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'),
           })
       })
