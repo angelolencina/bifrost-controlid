@@ -22,7 +22,9 @@ apiDeskbee.interceptors.request.use(
     if (!token) {
       console.log('getBearerToken dont have token in time')
       token = await getBearerToken()
-      await configuration.setToken(token)
+      if (token) {
+        await configuration.setToken(token)
+      }
     }
     config.headers['Authorization'] = `Bearer ${token}`
     return config

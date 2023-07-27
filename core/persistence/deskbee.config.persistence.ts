@@ -44,7 +44,7 @@ export default class DeskbeeConfigPersistence {
     })
   }
 
-  public async setToken(newToken: string | null): Promise<void> {
+  public async setToken(newToken: string): Promise<void> {
     const exists = await Database.from('configurations')
       .where('account', this.ACCOUNT)
       .select('id')
@@ -66,8 +66,9 @@ export default class DeskbeeConfigPersistence {
             updated_at: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss'),
           })
       })
+    } else {
+      this.save(newToken)
     }
-    return this.save(token)
   }
 
   public async getToken(): Promise<string | null> {
