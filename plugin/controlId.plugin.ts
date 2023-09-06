@@ -327,7 +327,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     const checkIns = lastRecords.map((record) => {
       return {
         device: record.deviceName,
-        person: record.name,
+        person: record.email,
         date: record.time,
         entrance: 1,
       }
