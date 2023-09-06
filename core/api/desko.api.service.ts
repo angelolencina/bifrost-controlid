@@ -28,6 +28,7 @@ export default class DeskoApiService {
   }
 
   public async sendDeviceEvent(events: CheckInOutDto[]) {
+    console.log('sendDeviceEvent', events)
     return checkinByUser(events)
   }
   private getEmailsHomologation(): string[] | boolean {
