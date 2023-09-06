@@ -347,7 +347,7 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
     const sqlite = `SELECT u.id, u.email, u.name, l.idDevice, l.deviceName, l.reader, l.idArea, l.area, l.event, l.time
     FROM Logs l
     INNER JOIN Users u ON l.idUser = u.id
-    WHERE l.event = 7 AND l.time > DATETIME(DATETIME('now'), '-5 minutes' )
+    WHERE l.event = 7 AND l.time > DATETIME(DATETIME('now'), '-5 minutes', 'localtime' )
     ORDER BY time DESC
     `
     const query = Env.get('CONTROLID_DB_CONNECTION') === 'mysql' ? mysqlQuery : sqlite
