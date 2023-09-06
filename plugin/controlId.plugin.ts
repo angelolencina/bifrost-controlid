@@ -324,10 +324,16 @@ export default class ControlidPlugin extends DeskoCore implements DeskoPlugin {
 
   public async checkEntryRecords() {
     const lastRecords = (await this.getUserPassLogs()) || []
-    console.log('Ultimas Entradas ControlID', lastRecords)
-    Logger.info(`AutomateCheckin : ${lastRecords.length} checkinEvents`)
+    const checkIns = lastRecords.map((record) => {
+      return {
+        device: record.deviceName,
+        person: record.name,
+        date: record.time,
+        entrance: 1,
+      }
+    })
     this.provider()
-      .automateCheckin(lastRecords)
+      .automateCheckin(checkIns)
       ?.then(() => {
         this.persist().entryRecord().save(TypeEventControlid.Pass)
       })
